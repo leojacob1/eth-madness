@@ -179,8 +179,8 @@
       }
     },
     "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/EthMadness.sol": {
-      "lastModificationDate": 1646279387521,
-      "contentHash": "3016b71d8b225261fa72fe4a30ccb3d2",
+      "lastModificationDate": 1646293084123,
+      "contentHash": "00d381caf2d2e518f999f22b4aeb471f",
       "sourceName": "src/EthMadness.sol",
       "solcConfig": {
         "settings": {
@@ -391,8 +391,8 @@
       }
     },
     "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/test/Contract.t.sol": {
-      "lastModificationDate": 1646284107455,
-      "contentHash": "60205c1410b904fd2eda23ffba1eba3d",
+      "lastModificationDate": 1646293097256,
+      "contentHash": "baecb608565b9a2bfb06071716755e01",
       "sourceName": "src/test/Contract.t.sol",
       "solcConfig": {
         "settings": {

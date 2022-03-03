@@ -10,18 +10,6 @@ contract EthMadness is Ownable {
         uint48 entryIndex;
     }
 
-    // Represents a current top score in the contest
-    struct TopScore {
-        // The index of this entry (used for tie-breakas a de-dups)
-        uint48 entryIndex;
-        // This bracket's score
-        uint32 score;
-        // The total point differential for this bracket
-        uint64 difference;
-        // The account which submitted this bracket
-        address submitter;
-    }
-
     // Represents the results of the contest.
     struct Result {
         // The encoded results of the tournament
@@ -58,7 +46,7 @@ contract EthMadness is Ownable {
     mapping(uint256 => Entrant) public entries;
 
     // The times where we're allowed to transition the contract's state
-    mapping(uint256 => uint256) public transitionTimes;
+    // mapping(uint256 => uint256) public transitionTimes;
 
     // The current state of the contest
     ContestState public currentState;
@@ -74,9 +62,6 @@ contract EthMadness is Ownable {
 
     // The final result of the tournament that the oracles agreed on
     Result public finalResult;
-
-    // Keeps the current top 3 best scores and who submitted them. When the contest ends, they'll be paid out
-    TopScore[3] public topThree;
 
     // The amount of the prize to reward
     // uint256 public prizeAmount;
@@ -94,7 +79,7 @@ contract EthMadness is Ownable {
     );
 
     // Constructs a new instance of the EthMadness contract with the given transition times
-    constructor(uint256[] memory times) public {
+    constructor() public {
         // Initialize the oracles array with the sender's address
         oracles = [msg.sender];
 
@@ -103,18 +88,18 @@ contract EthMadness is Ownable {
         // prizeAmount = erc20Amount;
 
         // Set up our transition times
-        require(times.length == 4);
-        transitionTimes[uint256(ContestState.TOURNAMENT_IN_PROGRESS)] = times[
-            0
-        ];
-        transitionTimes[uint256(ContestState.WAITING_FOR_ORACLES)] = times[1];
-        transitionTimes[
-            uint256(ContestState.WAITING_FOR_WINNING_CLAIMS)
-        ] = times[2];
-        transitionTimes[uint256(ContestState.COMPLETED)] = times[3];
+        // require(times.length == 4);
+        // transitionTimes[uint256(ContestState.TOURNAMENT_IN_PROGRESS)] = times[
+        //     0
+        // ];
+        // transitionTimes[uint256(ContestState.WAITING_FOR_ORACLES)] = times[1];
+        // transitionTimes[
+        //     uint256(ContestState.WAITING_FOR_WINNING_CLAIMS)
+        // ] = times[2];
+        // transitionTimes[uint256(ContestState.COMPLETED)] = times[3];
 
-        // The initial state should be allowing people to make entries
-        currentState = ContestState.OPEN_FOR_ENTRIES;
+        // // The initial state should be allowing people to make entries
+        // currentState = ContestState.OPEN_FOR_ENTRIES;
     }
 
     // Gets the total number of entries we've received
@@ -128,23 +113,23 @@ contract EthMadness is Ownable {
     }
 
     // Returns the transition times for our contest
-    function getTransitionTimes()
-        public
-        view
-        returns (
-            uint256,
-            uint256,
-            uint256,
-            uint256
-        )
-    {
-        return (
-            transitionTimes[uint256(ContestState.TOURNAMENT_IN_PROGRESS)],
-            transitionTimes[uint256(ContestState.WAITING_FOR_ORACLES)],
-            transitionTimes[uint256(ContestState.WAITING_FOR_WINNING_CLAIMS)],
-            transitionTimes[uint256(ContestState.COMPLETED)]
-        );
-    }
+    // function getTransitionTimes()
+    //     public
+    //     view
+    //     returns (
+    //         uint256,
+    //         uint256,
+    //         uint256,
+    //         uint256
+    //     )
+    // {
+    //     return (
+    //         transitionTimes[uint256(ContestState.TOURNAMENT_IN_PROGRESS)],
+    //         transitionTimes[uint256(ContestState.WAITING_FOR_ORACLES)],
+    //         transitionTimes[uint256(ContestState.WAITING_FOR_WINNING_CLAIMS)],
+    //         transitionTimes[uint256(ContestState.COMPLETED)]
+    //     );
+    // }
 
     // Internal function for advancing the state of the bracket
     function advanceState(ContestState nextState) private {
@@ -152,30 +137,29 @@ contract EthMadness is Ownable {
             uint256(nextState) == uint256(currentState) + 1,
             "Can only advance state by 1"
         );
-        require(
-            block.timestamp > transitionTimes[uint256(nextState)],
-            "Transition time hasn't happened yet"
-        );
+        // require(
+        //     block.timestamp > transitionTimes[uint256(nextState)],
+        //     "Transition time hasn't happened yet"
+        // );
 
         currentState = nextState;
     }
 
     // Helper to make sure the picks submitted are legal
-    function arePicksOrResultsValid(bytes16 picksOrResults)
-        public
-        pure
-        returns (bool)
-    {
-        // Go through and make sure that this entry has 1 pick for each game
-        for (uint8 gameId = 0; gameId < 63; gameId++) {
-            uint128 currentPick = extractResult(picksOrResults, gameId);
-            if (currentPick != 2 && currentPick != 1) {
-                return false;
-            }
-        }
+    // function arePicksOrResultsValid(bytes16 picksOrResults)
+    //     public
+    //     returns (bool)
+    // {
+    //     // Go through and make sure that this entry has 1 pick for each game
+    //     for (uint8 gameId = 0; gameId < 63; gameId++) {
+    //         uint128 currentPick = extractResult(picksOrResults, gameId);
+    //         if (currentPick != 2 && currentPick != 1) {
+    //             // return false;
+    //         }
+    //     }
 
-        return true;
-    }
+    //     return true;
+    // }
 
     // Submits a new entry to the tournament
     function submitEntry(
@@ -188,10 +172,10 @@ contract EthMadness is Ownable {
             currentState == ContestState.OPEN_FOR_ENTRIES,
             "Must be in the open for entries state"
         );
-        require(
-            arePicksOrResultsValid(picks),
-            "The supplied picks are not valid"
-        );
+        // require(
+        //     arePicksOrResultsValid(picks),
+        //     "The supplied picks are not valid"
+        // );
 
         // Do some work to encode the picks and scores into a single uint256 which becomes a key
         uint256 scoreAShifted = uint256(scoreA) * (2**(24 * 8));
@@ -255,7 +239,7 @@ contract EthMadness is Ownable {
             "Must be in waiting for oracles state"
         );
         require(oracles[oracleIndex] == msg.sender, "Wrong oracle index");
-        require(arePicksOrResultsValid(winners), "Results are not valid");
+        // require(arePicksOrResultsValid(winners), "Results are not valid");
         oracleVotes[msg.sender] = Result(winners, scoreA, scoreB, true);
     }
 
@@ -315,113 +299,113 @@ contract EthMadness is Ownable {
 
     // After the oracles have voted and winners have claimed their prizes, this closes the contest and
     // pays out the winnings to the 3 winners
-    function closeContestAndPayWinners() public {
-        advanceState(ContestState.COMPLETED);
-        require(topThree[0].submitter != address(0), "Not enough claims");
-        require(topThree[1].submitter != address(0), "Not enough claims");
-        require(topThree[2].submitter != address(0), "Not enough claims");
+    // function closeContestAndPayWinners() public {
+    //     advanceState(ContestState.COMPLETED);
+    //     require(topThree[0].submitter != address(0), "Not enough claims");
+    //     require(topThree[1].submitter != address(0), "Not enough claims");
+    //     require(topThree[2].submitter != address(0), "Not enough claims");
 
-        // uint256 firstPrize = (prizeAmount * 70) / 100;
-        // uint256 secondPrize = (prizeAmount * 20) / 100;
-        // uint256 thirdPrize = (prizeAmount * 10) / 100;
-        // IERC20 erc20 = IERC20(prizeERC20TokenAddress);
-        // erc20.transfer(topThree[0].submitter, firstPrize);
-        // erc20.transfer(topThree[1].submitter, secondPrize);
-        // erc20.transfer(topThree[2].submitter, thirdPrize);
-    }
+    //     // uint256 firstPrize = (prizeAmount * 70) / 100;
+    //     // uint256 secondPrize = (prizeAmount * 20) / 100;
+    //     // uint256 thirdPrize = (prizeAmount * 10) / 100;
+    //     // IERC20 erc20 = IERC20(prizeERC20TokenAddress);
+    //     // erc20.transfer(topThree[0].submitter, firstPrize);
+    //     // erc20.transfer(topThree[1].submitter, secondPrize);
+    //     // erc20.transfer(topThree[2].submitter, thirdPrize);
+    // }
 
     // Scores an entry and places it in the right sort order
-    function scoreAndSortEntry(
-        uint256 entryCompressed,
-        bytes16 results,
-        uint64 scoreAActual,
-        uint64 scoreBActual
-    ) private returns (uint32) {
-        require(
-            currentState == ContestState.WAITING_FOR_WINNING_CLAIMS,
-            "Must be in the waiting for claims state"
-        );
-        require(
-            entries[entryCompressed].submitter != address(0),
-            "The entry must have actually been submitted"
-        );
+    // function scoreAndSortEntry(
+    //     uint256 entryCompressed,
+    //     bytes16 results,
+    //     uint64 scoreAActual,
+    //     uint64 scoreBActual
+    // ) private returns (uint32) {
+    //     require(
+    //         currentState == ContestState.WAITING_FOR_WINNING_CLAIMS,
+    //         "Must be in the waiting for claims state"
+    //     );
+    //     require(
+    //         entries[entryCompressed].submitter != address(0),
+    //         "The entry must have actually been submitted"
+    //     );
 
-        // Pull out the pick information from the compressed entry
-        bytes16 picks = bytes16(
-            uint128((entryCompressed & uint256((2**128) - 1)))
-        );
-        uint256 shifted = entryCompressed / (2**128); // shift over 128 bits
-        uint64 scoreA = uint64((shifted & uint256((2**64) - 1)));
-        shifted = entryCompressed / (2**192);
-        uint64 scoreB = uint64((shifted & uint256((2**64) - 1)));
+    //     // Pull out the pick information from the compressed entry
+    //     bytes16 picks = bytes16(
+    //         uint128((entryCompressed & uint256((2**128) - 1)))
+    //     );
+    //     uint256 shifted = entryCompressed / (2**128); // shift over 128 bits
+    //     uint64 scoreA = uint64((shifted & uint256((2**64) - 1)));
+    //     shifted = entryCompressed / (2**192);
+    //     uint64 scoreB = uint64((shifted & uint256((2**64) - 1)));
 
-        // Compute the score and the total difference
-        uint32 score = scoreEntry(picks, results);
-        uint64 difference = computeFinalGameDifference(
-            scoreA,
-            scoreB,
-            scoreAActual,
-            scoreBActual
-        );
+    //     // Compute the score and the total difference
+    //     uint32 score = scoreEntry(picks, results);
+    //     uint64 difference = computeFinalGameDifference(
+    //         scoreA,
+    //         scoreB,
+    //         scoreAActual,
+    //         scoreBActual
+    //     );
 
-        // Make a score and place it in the right sort order
-        TopScore memory scoreResult = TopScore(
-            entries[entryCompressed].entryIndex,
-            score,
-            difference,
-            entries[entryCompressed].submitter
-        );
-        if (isScoreBetter(scoreResult, topThree[0])) {
-            topThree[2] = topThree[1];
-            topThree[1] = topThree[0];
-            topThree[0] = scoreResult;
-        } else if (isScoreBetter(scoreResult, topThree[1])) {
-            topThree[2] = topThree[1];
-            topThree[1] = scoreResult;
-        } else if (isScoreBetter(scoreResult, topThree[2])) {
-            topThree[2] = scoreResult;
-        }
+    //     // Make a score and place it in the right sort order
+    //     TopScore memory scoreResult = TopScore(
+    //         entries[entryCompressed].entryIndex,
+    //         score,
+    //         difference,
+    //         entries[entryCompressed].submitter
+    //     );
+    //     if (isScoreBetter(scoreResult, topThree[0])) {
+    //         topThree[2] = topThree[1];
+    //         topThree[1] = topThree[0];
+    //         topThree[0] = scoreResult;
+    //     } else if (isScoreBetter(scoreResult, topThree[1])) {
+    //         topThree[2] = topThree[1];
+    //         topThree[1] = scoreResult;
+    //     } else if (isScoreBetter(scoreResult, topThree[2])) {
+    //         topThree[2] = scoreResult;
+    //     }
 
-        return score;
-    }
+    //     return score;
+    // }
 
-    function claimTopEntry(uint256 entryCompressed) public {
-        require(
-            currentState == ContestState.WAITING_FOR_WINNING_CLAIMS,
-            "Must be in the waiting for winners state"
-        );
-        require(
-            finalResult.isFinal,
-            "The final result must be marked as final"
-        );
-        scoreAndSortEntry(
-            entryCompressed,
-            finalResult.winners,
-            finalResult.scoreA,
-            finalResult.scoreB
-        );
-    }
+    // function claimTopEntry(uint256 entryCompressed) public {
+    //     require(
+    //         currentState == ContestState.WAITING_FOR_WINNING_CLAIMS,
+    //         "Must be in the waiting for winners state"
+    //     );
+    //     require(
+    //         finalResult.isFinal,
+    //         "The final result must be marked as final"
+    //     );
+    //     scoreAndSortEntry(
+    //         entryCompressed,
+    //         finalResult.winners,
+    //         finalResult.scoreA,
+    //         finalResult.scoreB
+    //     );
+    // }
 
-    function computeFinalGameDifference(
-        uint64 scoreAGuess,
-        uint64 scoreBGuess,
-        uint64 scoreAActual,
-        uint64 scoreBActual
-    ) private pure returns (uint64) {
-        // Don't worry about overflow here, not much you can really do with it
-        uint64 difference = 0;
-        difference += (
-            (scoreAActual > scoreAGuess)
-                ? (scoreAActual - scoreAGuess)
-                : (scoreAGuess - scoreAActual)
-        );
-        difference += (
-            (scoreBActual > scoreBGuess)
-                ? (scoreBActual - scoreBGuess)
-                : (scoreBGuess - scoreBActual)
-        );
-        return difference;
-    }
+    // function computeFinalGameDifference(
+    //     uint64 scoreAGuess,
+    //     uint64 scoreBGuess,
+    //     uint64 scoreAActual,
+    //     uint64 scoreBActual
+    // ) private pure returns (uint64) {
+    //     // Don't worry about overflow here, not much you can really do with it
+    //     uint64 difference = 0;
+    //     difference += (
+    //         (scoreAActual > scoreAGuess)
+    //             ? (scoreAActual - scoreAGuess)
+    //             : (scoreAGuess - scoreAActual)
+    //     );
+    //     difference += (
+    //         (scoreBActual > scoreBGuess)
+    //             ? (scoreBActual - scoreBGuess)
+    //             : (scoreBGuess - scoreBActual)
+    //     );
+    //     return difference;
+    // }
 
     // Gets the bit at index n in a
     function getBit16(bytes16 a, uint16 n) private pure returns (bool) {
@@ -461,14 +445,15 @@ contract EthMadness is Ownable {
     }
 
     // Returns either 0 if there is no possible winner, 1 if team B is chosen, or 2 if team A is chosen
-    function extractResult(bytes16 a, uint8 n) private pure returns (uint128) {
-        uint128 mask = uint128(0x00000000000000000000000000000003) *
-            uint128(2)**(n * 2);
-        uint128 masked = uint128(a) & mask;
+    // function extractResult(bytes16 a, uint8 n) private returns (uint128) {
+    //     uint128 mask = uint128(0x00000000000000000000000000000003) *
+    //         uint128(2)**(n * 2);
+    //     uint128 masked = uint128(a) & mask;
 
-        // Shift back to get either 0, 1 or 2
-        return (masked / (uint128(2)**(n * 2)));
-    }
+    //     // Shift back to get either 0, 1 or 2
+    //     emit log_uint(masked / (uint128(2)**(n * 2)));
+    //     return (masked / (uint128(2)**(n * 2)));
+    // }
 
     // Gets which round a game belongs to based on its id
     function getRoundForGame(uint8 gameId) private pure returns (uint8) {
@@ -505,79 +490,78 @@ contract EthMadness is Ownable {
     }
 
     // Looks at two scores and decided whether newScore is a better score than old score
-    function isScoreBetter(TopScore memory newScore, TopScore memory oldScore)
-        private
-        pure
-        returns (bool)
-    {
-        if (newScore.score > oldScore.score) {
-            return true;
-        }
+    // function isScoreBetter(TopScore memory newScore, TopScore memory oldScore)
+    //     private
+    //     pure
+    //     returns (bool)
+    // {
+    //     if (newScore.score > oldScore.score) {
+    //         return true;
+    //     }
 
-        if (newScore.score < oldScore.score) {
-            return false;
-        }
+    //     if (newScore.score < oldScore.score) {
+    //         return false;
+    //     }
 
-        // Case where we have a tie
-        if (newScore.difference < oldScore.difference) {
-            return true;
-        }
+    //     // Case where we have a tie
+    //     if (newScore.difference < oldScore.difference) {
+    //         return true;
+    //     }
 
-        if (newScore.difference < oldScore.difference) {
-            return false;
-        }
+    //     if (newScore.difference < oldScore.difference) {
+    //         return false;
+    //     }
 
-        require(
-            newScore.entryIndex != oldScore.entryIndex,
-            "This entry has already claimed a prize"
-        );
+    //     require(
+    //         newScore.entryIndex != oldScore.entryIndex,
+    //         "This entry has already claimed a prize"
+    //     );
 
-        // Crazy case where we have the same score and same diference. Return the earlier entry as the winnner
-        return newScore.entryIndex < oldScore.entryIndex;
-    }
+    //     // Crazy case where we have the same score and same diference. Return the earlier entry as the winnner
+    //     return newScore.entryIndex < oldScore.entryIndex;
+    // }
 
     // Scores an entry given the picks and the results
-    function scoreEntry(bytes16 picks, bytes16 results)
-        private
-        pure
-        returns (uint32)
-    {
-        uint32 score = 0;
-        uint8 round = 0;
-        bytes16 currentPicks = picks;
-        for (uint8 gameId = 0; gameId < 63; gameId++) {
-            // Update which round we're in when on the transitions
-            round = getRoundForGame(gameId);
+    // function scoreEntry(bytes16 picks, bytes16 results)
+    //     private
+    //     returns (uint32)
+    // {
+    //     uint32 score = 0;
+    //     uint8 round = 0;
+    //     bytes16 currentPicks = picks;
+    //     for (uint8 gameId = 0; gameId < 63; gameId++) {
+    //         // Update which round we're in when on the transitions
+    //         round = getRoundForGame(gameId);
 
-            uint128 currentPick = extractResult(currentPicks, gameId);
-            if (currentPick == extractResult(results, gameId)) {
-                score += (uint32(2)**round);
-            } else if (currentPick != 0) {
-                // If we actually had a pick, propagate forward
-                // Mark all the future currentPicks which required this team winning as null
-                uint8 currentPickId = (gameId * 2) + (currentPick == 2 ? 1 : 0);
-                for (
-                    uint8 futureRound = round + 1;
-                    futureRound < 6;
-                    futureRound++
-                ) {
-                    uint16 currentPickOffset = currentPickId -
-                        (getFirstGameIdOfRound(futureRound - 1) * 2);
-                    currentPickId = uint8(
-                        (getFirstGameIdOfRound(futureRound) * 2) +
-                            (currentPickOffset / 2)
-                    );
+    //         uint128 currentPick = extractResult(currentPicks, gameId);
+    //         if (currentPick == extractResult(results, gameId)) {
+    //             score += (uint32(2)**round);
+    //         } else if (currentPick != 0) {
+    //             // If we actually had a pick, propagate forward
+    //             // Mark all the future currentPicks which required this team winning as null
+    //             uint8 currentPickId = (gameId * 2) + (currentPick == 2 ? 1 : 0);
+    //             for (
+    //                 uint8 futureRound = round + 1;
+    //                 futureRound < 6;
+    //                 futureRound++
+    //             ) {
+    //                 uint16 currentPickOffset = currentPickId -
+    //                     (getFirstGameIdOfRound(futureRound - 1) * 2);
+    //                 currentPickId = uint8(
+    //                     (getFirstGameIdOfRound(futureRound) * 2) +
+    //                         (currentPickOffset / 2)
+    //                 );
 
-                    bool pickedLoser = getBit16(currentPicks, currentPickId);
-                    if (pickedLoser) {
-                        currentPicks = clearBit16(currentPicks, currentPickId);
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }
+    //                 bool pickedLoser = getBit16(currentPicks, currentPickId);
+    //                 if (pickedLoser) {
+    //                     currentPicks = clearBit16(currentPicks, currentPickId);
+    //                 } else {
+    //                     break;
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        return score;
-    }
+    //     return score;
+    // }
 }

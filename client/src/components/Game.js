@@ -173,9 +173,10 @@ class Game extends Component {
   }
 
   render() {
-    const {topTeam, bottomTeam, classes, topSlotId, bottomSlotId, currentPickSlotId} = this.props;
+    const { topTeam, bottomTeam, classes, topSlotId, bottomSlotId, currentPickSlotId } = this.props;
     return (
       <div className={classes.root}>
+        {this.props.gameId}
         <Paper >
           {[
             this.createTeamLine(topTeam, topSlotId, currentPickSlotId),

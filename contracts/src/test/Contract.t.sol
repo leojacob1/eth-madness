@@ -18,7 +18,7 @@ contract ContractTest is DSTest {
         1555484399
     ];
     string encodedPicks =
-        "00010110011010010101100110011010100110101001100110100110101010010101101010011010011001100110101001010110100110010110010110100101";
+        "00100110101010010110010110010110011001011001011010100110101010100110101001010101011001011001011001100110100110011010100110100110";
     uint64 scoreA = 0x5f;
     uint64 scoreB = 0x44;
     string bracketName = "reboot Pizza Investment Account";
@@ -37,20 +37,19 @@ contract ContractTest is DSTest {
         return string(result);
     }
 
-    function concat(
-        bytes memory b1,
-        bytes1 b2,
-        uint256 currentSize
-    ) public returns (bytes memory) {
-        uint256 newSize = currentSize + 1;
-        bytes memory result = new bytes(newSize);
-        emit log_uint(newSize);
-        assembly {
-            mstore(add(result, currentSize), b1)
-            mstore(add(result, newSize), b2)
-        }
-        return result;
-    }
+    // function concat(
+    //     bytes memory b1,
+    //     bytes1 b2,
+    //     uint256 currentSize
+    // ) public returns (bytes memory) {
+    //     uint256 newSize = currentSize + 1;
+    //     bytes memory result = new bytes(1);
+    //     assembly {
+    //         mstore(add(result, 1), b1)
+    //         mstore(add(result, 1), b2)
+    //     }
+    //     return result;
+    // }
 
     function convertEncodedPicksToByteArray(string memory bitString)
         private
@@ -59,17 +58,22 @@ contract ContractTest is DSTest {
         require(bytes(bitString).length % 8 == 0, "Wrong size bit string");
 
         bytes memory result = new bytes(16);
+        // result = new bytes(0);
         for (uint8 i = 0; i < bytes(bitString).length; i += 8) {
-            result = concat(
-                result,
-                bytes1(
-                    convertBitStringToNumber(substring(bitString, i, i + 8))
-                ),
-                i / 8
+            uint256 index = i / 8;
+            result[index] = bytes1(
+                convertBitStringToNumber(substring(bitString, i, i + 8))
             );
+            // result = concat(
+            //     result,
+            //     bytes1(
+            //         convertBitStringToNumber(substring(bitString, i, i + 8))
+            //     ),
+            //     i / 8
+            // );
         }
 
-        emit log_uint(result.length);
+        emit log_bytes(result);
 
         return bytes16(result);
     }
@@ -121,7 +125,7 @@ contract ContractTest is DSTest {
     // }
 
     function setUp() public {
-        ethMadness = new EthMadness(transitionTimes);
+        ethMadness = new EthMadness();
     }
 
     function testExample() public {
@@ -136,5 +140,10 @@ contract ContractTest is DSTest {
             scoreB,
             bracketName
         );
+    }
+
+    function testConvert() public {
+        bytes16 picks = 0x262965166516262a6a55651666192926;
+        emit log_named_uint("PICK", uint8(picks[0]));
     }
 }

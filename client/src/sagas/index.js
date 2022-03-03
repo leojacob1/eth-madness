@@ -48,7 +48,7 @@ export const getContractInstance = async (accountsNeeded) => {
   const deployedNetwork = EthMadness.networks[networkId];
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
-  let contractInstance = new ethers.Contract(deployedNetwork.address, EthMadness.abi, provider);
+  let contractInstance = new ethers.Contract("0x3f556287834294b58a162c522acbc52cf872ad97", EthMadness.abi, provider);
   const signer = provider.getSigner();
   contractInstance = contractInstance.connect(signer);
 
