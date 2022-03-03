@@ -15,7 +15,7 @@ const mapStateToProps = (state) => {
   const entry = state.leaderboard.allEntries[bracketId];
   if (!entry) {
     // If we don't have this entry in our collection of entries, try reloading the data
-    
+
     return {
       isLoading: true,
       realProps: {}

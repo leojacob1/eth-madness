@@ -57,8 +57,8 @@ class CreateEntry extends Component {
           <CreateEntryToolbar {...createEntryProps} />
         </div>
         <Hidden smDown>
-          <Bracket 
-            classes={{root: classes.bracket}}
+          <Bracket
+            classes={{ root: classes.bracket }}
             games={games}
             makePick={makePick}
             numRounds={numRounds}
@@ -71,45 +71,27 @@ class CreateEntry extends Component {
             changeBracketProperty={changeBracketProperty}
             isEditable={true}
             eliminatedTeamIds={{}}
-            />
+          />
         </Hidden>
         <Hidden mdUp>
-        <BracketMobile
-          classes={{root: classes.bracket}}
-          games={games}
-          makePick={makePick}
-          numRounds={numRounds}
-          submitPicks={submitPicks}
-          submitEnabled={submitEnabled}
-          encodedPicks={encodedPicks}
-          topTeamScore={topTeamScore}
-          bottomTeamScore={bottomTeamScore}
-          message={message}
-          changeBracketProperty={changeBracketProperty}
-          isEditable={true}
-          eliminatedTeamIds={{}}
+          <BracketMobile
+            classes={{ root: classes.bracket }}
+            games={games}
+            makePick={makePick}
+            numRounds={numRounds}
+            submitPicks={submitPicks}
+            submitEnabled={submitEnabled}
+            encodedPicks={encodedPicks}
+            topTeamScore={topTeamScore}
+            bottomTeamScore={bottomTeamScore}
+            message={message}
+            changeBracketProperty={changeBracketProperty}
+            isEditable={true}
+            eliminatedTeamIds={{}}
           />
         </Hidden>
         <SubmitPicksContainer />
-        <Dialog disableBackdropClick={true} disableEscapeKeyDown={true} maxWidth="xs" open={true}>
-          <DialogTitle align="center">The Big Dance Has Begun!</DialogTitle>
-          <DialogContent classes={{root:classes.content}}>
-            <DialogContentText>
-              Since the tournament has already started, we are no longer accepting any more brackets.
-            </DialogContentText>
-            <br />
-            <DialogContentText>
-              You can check your bracket and the overall standings on the  <NavLink
-              to={{ pathname: `/leaders`, search: this.props.location.search}}>Leaderboard</NavLink>.
-            </DialogContentText>
-            <DialogContentText className={classes.viewLeaderboardButton}>
-            <NavLink className={classes.viewLeaderboardButton}
-              to={{ pathname: `/leaders`, search: this.props.location.search}}>
-              <Button fullWidth variant="contained" >View Leaderboard</Button>
-            </NavLink>
-            </DialogContentText>
-          </DialogContent>
-        </Dialog>
+
       </div>
     );
   }
@@ -130,7 +112,7 @@ CreateEntry.propTypes = {
   topTeamScore: PropTypes.string.isRequired,
   bottomTeamScore: PropTypes.string.isRequired,
   message: PropTypes.string.isRequired,
-  changeBracketProperty: PropTypes.func.isRequired, 
+  changeBracketProperty: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(CreateEntry);

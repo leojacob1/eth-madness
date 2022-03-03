@@ -1,0 +1,436 @@
+{
+  "_format": "ethers-rs-sol-cache-2",
+  "files": {
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/lib/ds-test/src/test.sol": {
+      "lastModificationDate": 1645761010916,
+      "contentHash": "5d45a46528eaf8a26f0a8d93669f3148",
+      "sourceName": "lib/ds-test/src/test.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.4.23",
+      "artifacts": {
+        "DSTest": {
+          "0.8.10+commit.fc410830.Darwin.appleclang": "test.sol/DSTest.json"
+        }
+      }
+    },
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/lib/openzeppelin-contracts/contracts/access/Ownable.sol": {
+      "lastModificationDate": 1645761291296,
+      "contentHash": "8398972af73b4e9e5ff3b31cad86234f",
+      "sourceName": "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "Ownable": {
+          "0.8.10+commit.fc410830.Darwin.appleclang": "Ownable.sol/Ownable.json"
+        }
+      }
+    },
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/lib/openzeppelin-contracts/contracts/utils/Context.sol": {
+      "lastModificationDate": 1645761291350,
+      "contentHash": "5f2c5c4b6af2dd4551027144797bc8be",
+      "sourceName": "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "Context": {
+          "0.8.10+commit.fc410830.Darwin.appleclang": "Context.sol/Context.json"
+        }
+      }
+    },
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/ERC20.sol": {
+      "lastModificationDate": 1646265036683,
+      "contentHash": "7b6557ad56dbae149303c0a1c5d74c50",
+      "sourceName": "src/ERC20.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [
+        "src/IERC20.sol",
+        "src/SafeMath.sol"
+      ],
+      "versionRequirement": "^0.5.0",
+      "artifacts": {
+        "ERC20": {
+          "0.5.17+commit.d19bba13.Darwin.appleclang": "ERC20.sol/ERC20.json"
+        }
+      }
+    },
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/ERC20Detailed.sol": {
+      "lastModificationDate": 1646265036727,
+      "contentHash": "d236f45915ed50dc214ad2dfd472b9db",
+      "sourceName": "src/ERC20Detailed.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [
+        "src/IERC20.sol"
+      ],
+      "versionRequirement": "^0.5.0",
+      "artifacts": {
+        "ERC20Detailed": {
+          "0.5.17+commit.d19bba13.Darwin.appleclang": "ERC20Detailed.sol/ERC20Detailed.json"
+        }
+      }
+    },
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/EthMadness.sol": {
+      "lastModificationDate": 1646270989345,
+      "contentHash": "3016b71d8b225261fa72fe4a30ccb3d2",
+      "sourceName": "src/EthMadness.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [
+        "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol"
+      ],
+      "versionRequirement": "^0.8.10",
+      "artifacts": {
+        "EthMadness": {
+          "0.8.10+commit.fc410830.Darwin.appleclang": "EthMadness.sol/EthMadness.json"
+        }
+      }
+    },
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/IERC20.sol": {
+      "lastModificationDate": 1646265036886,
+      "contentHash": "24226c1e2200cda102c352d79082ffba",
+      "sourceName": "src/IERC20.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.5.0",
+      "artifacts": {
+        "IERC20": {
+          "0.5.17+commit.d19bba13.Darwin.appleclang": "IERC20.sol/IERC20.json"
+        }
+      }
+    },
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/Migrations.sol": {
+      "lastModificationDate": 1646265036915,
+      "contentHash": "8a500f6510a8dc60349379090e5106e7",
+      "sourceName": "src/Migrations.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.5.0",
+      "artifacts": {
+        "Migrations": {
+          "0.5.17+commit.d19bba13.Darwin.appleclang": "Migrations.sol/Migrations.json"
+        }
+      }
+    },
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/Ownable.sol": {
+      "lastModificationDate": 1646265036946,
+      "contentHash": "0c0d50cbd26c64773f74ed9c616b9884",
+      "sourceName": "src/Ownable.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.5.0",
+      "artifacts": {
+        "Ownable": {
+          "0.5.17+commit.d19bba13.Darwin.appleclang": "Ownable.sol/Ownable.json"
+        }
+      }
+    },
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/SafeMath.sol": {
+      "lastModificationDate": 1646265036977,
+      "contentHash": "67934a349ee6fdf0cca7424a47868a9b",
+      "sourceName": "src/SafeMath.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.5.0",
+      "artifacts": {
+        "SafeMath": {
+          "0.5.17+commit.d19bba13.Darwin.appleclang": "SafeMath.sol/SafeMath.json"
+        }
+      }
+    },
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/SimpleToken.sol": {
+      "lastModificationDate": 1646265037005,
+      "contentHash": "a2674ab7b602f34ddd23b81c0a666b24",
+      "sourceName": "src/SimpleToken.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [
+        "src/ERC20.sol",
+        "src/ERC20Detailed.sol",
+        "src/IERC20.sol",
+        "src/SafeMath.sol"
+      ],
+      "versionRequirement": "^0.5.0",
+      "artifacts": {
+        "SimpleToken": {
+          "0.5.17+commit.d19bba13.Darwin.appleclang": "SimpleToken.sol/SimpleToken.json"
+        }
+      }
+    },
+    "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/test/Contract.t.sol": {
+      "lastModificationDate": 1646270584944,
+      "contentHash": "8281d3b17f487494c91581d899658624",
+      "sourceName": "src/test/Contract.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ]
+            }
+          },
+          "evmVersion": "london"
+        }
+      },
+      "imports": [
+        "lib/ds-test/src/test.sol",
+        "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
+        "lib/openzeppelin-contracts/contracts/utils/Context.sol",
+        "src/EthMadness.sol"
+      ],
+      "versionRequirement": "=0.8.10",
+      "artifacts": {
+        "CheatCodes": {
+          "0.8.10+commit.fc410830.Darwin.appleclang": "Contract.t.sol/CheatCodes.json"
+        },
+        "ContractTest": {
+          "0.8.10+commit.fc410830.Darwin.appleclang": "Contract.t.sol/ContractTest.json"
+        }
+      }
+    }
+  }
+}

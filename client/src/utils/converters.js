@@ -23,7 +23,7 @@ const convertBitStringToNumber = (bits) => {
   }
 
   let result = 0;
-  for (let i = bits.length - 1; i >=0; i--) {
+  for (let i = bits.length - 1; i >= 0; i--) {
     const power = (bits.length - i) - 1;
     result += bits.charAt(i) * (2 ** power);
   }
@@ -53,7 +53,7 @@ export const convertHexToBitString = (hexString, expectedLength) => {
 
 
 const getRoundStartIndex = (round) => {
-  if (round > NUM_ROUNDS) { 
+  if (round > NUM_ROUNDS) {
     return -1;
   }
 
@@ -100,7 +100,7 @@ export const deserializeHexPicks = (hexPicks, teamsById) => {
     const isTopTeam = bitTopTeam === '0';
     const round = getRoundForGameId(gameId);
     let teamId;
-    
+
     // First round picks
     if (round === 1) {
       teamId = (gameId * 2) + (isTopTeam ? 0 : 1);

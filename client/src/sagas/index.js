@@ -7,6 +7,7 @@ import * as Actions from '../actions';
 import * as ContestState from '../utils/ContestState';
 import { convertEncodedPicksToByteArray } from '../utils/converters';
 import { getWeb3WithAccounts } from '../utils/getWeb3';
+import { utils, BigNumber, ethers } from 'ethers';
 
 const getWeb3ForNetworkId = async (networkId, accountsNeeded) => {
   if (accountsNeeded) {
@@ -18,9 +19,9 @@ const getWeb3ForNetworkId = async (networkId, accountsNeeded) => {
       if (networkId.toString() !== networkIdOfProvider.toString()) {
         throw new Error(`Web3 instance connected to the wrong network. Expected ${networkId}, Actual ${networkIdOfProvider}`);
       }
-  
+
       return provider;
-    } catch(e) {
+    } catch (e) {
       console.error('Error trying to get web3 with accounts');
       console.error(e);
       throw new Error('no_web3');
@@ -28,13 +29,13 @@ const getWeb3ForNetworkId = async (networkId, accountsNeeded) => {
 
   } else {
     const nsApiKey = '69bbfd65cae84e6bae3c62c2bde588c6';
-    switch(networkId) {
+    switch (networkId) {
       case '5777':
-        return Promise.resolve(new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'))); 
+        return Promise.resolve(new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545')));
       case '42':
-        return Promise.resolve(new Web3(new Web3.providers.HttpProvider(`https://ethereum.api.nodesmith.io/v1/kovan/jsonrpc?apiKey=${nsApiKey}`))); 
+        return Promise.resolve(new Web3(new Web3.providers.HttpProvider(`https://ethereum.api.nodesmith.io/v1/kovan/jsonrpc?apiKey=${nsApiKey}`)));
       case '1':
-        return Promise.resolve(new Web3(new Web3.providers.HttpProvider(`https://ethereum.api.nodesmith.io/v1/mainnet/jsonrpc?apiKey=${nsApiKey}`))); 
+        return Promise.resolve(new Web3(new Web3.providers.HttpProvider(`https://ethereum.api.nodesmith.io/v1/mainnet/jsonrpc?apiKey=${nsApiKey}`)));
       default:
         throw new Error(`Unknown network id ${networkId}`);
     }
@@ -45,19 +46,22 @@ export const getContractInstance = async (accountsNeeded) => {
   const parsedQs = queryString.parse(window.location.search);
   const networkId = parsedQs['networkId'] || '1';
   const deployedNetwork = EthMadness.networks[networkId];
-  const web3 = await getWeb3ForNetworkId(networkId, accountsNeeded);
-  const contractInstance = new web3.eth.Contract(
-    EthMadness.abi,
-    deployedNetwork.address,
-  );
 
-  return { networkId, contractInstance, contractAddress: deployedNetwork.address, web3 };
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  let contractInstance = new ethers.Contract(deployedNetwork.address, EthMadness.abi, provider);
+  const signer = provider.getSigner();
+  contractInstance = contractInstance.connect(signer);
+
+  return { networkId, contractInstance, contractAddress: deployedNetwork.address, provider };
 }
 
-export const getWeb3AndAccounts = async () => {
-  const { networkId, contractInstance, contractAddress, web3 } = await getContractInstance(true);
-  const accounts = await web3.eth.getAccounts();
-  return { accounts, networkId, contractInstance, contractAddress, web3 };
+export const getProviderAndAccounts = async () => {
+  const { networkId, contractInstance, contractAddress, provider } = await getContractInstance(true);
+  const accounts = await window.ethereum.request({
+    method: "eth_requestAccounts",
+  });
+  console.log('ACCOUNTS', accounts)
+  return { accounts, networkId, contractInstance, contractAddress, provider };
 }
 
 function* loadContractInfo(includeAdminStuff) {
@@ -116,7 +120,7 @@ function* loadContractInfo(includeAdminStuff) {
         contractAddress,
         entryCount
       };
-  
+
       yield put(Actions.setContractMetadata(metadata, false));
     }
 
@@ -128,17 +132,17 @@ function* loadContractInfo(includeAdminStuff) {
 
 function* submitOracleVote(action) {
   const { results, scoreA, scoreB } = action;
-  const { contractInstance, accounts } = yield call(getWeb3AndAccounts);
+  const { contractInstance, accounts } = yield call(getProviderAndAccounts);
   const fromAddress = accounts[0];
-  yield call(contractInstance.methods.submitOracleVote(action.oracleIndex, results, scoreA, scoreB).send, { 
+  yield call(contractInstance.methods.submitOracleVote(action.oracleIndex, results, scoreA, scoreB).send, {
     from: fromAddress
   });
 }
 
 function* addOracle(action) {
-  const { contractInstance, accounts } = yield call(getWeb3AndAccounts);
+  const { contractInstance, accounts } = yield call(getProviderAndAccounts);
   const fromAddress = accounts[0];
-  yield call(contractInstance.methods.addOracle(action.oracleAddress).send, { 
+  yield call(contractInstance.methods.addOracle(action.oracleAddress).send, {
     from: fromAddress
   });
 }
@@ -146,21 +150,21 @@ function* addOracle(action) {
 function* advanceContestState(action) {
   try {
     console.log('Advancing state');
-    const { contractInstance, accounts } = yield call(getWeb3AndAccounts);
+    const { contractInstance, accounts } = yield call(getProviderAndAccounts);
     const fromAddress = accounts[0];
     switch (action.nextState) {
       case ContestState.TOURNAMENT_IN_PROGRESS:
-        yield call(contractInstance.methods.markTournamentInProgress().send, { 
+        yield call(contractInstance.methods.markTournamentInProgress().send, {
           from: fromAddress
         });
         break;
       case ContestState.WAITING_FOR_ORACLES:
-        yield call(contractInstance.methods.markTournamentFinished().send, { 
+        yield call(contractInstance.methods.markTournamentFinished().send, {
           from: fromAddress
         });
         break;
       case ContestState.COMPLETED:
-        yield call(contractInstance.methods.closeContestAndPayWinners().send, { 
+        yield call(contractInstance.methods.closeContestAndPayWinners().send, {
           from: fromAddress
         });
         break;
@@ -169,52 +173,60 @@ function* advanceContestState(action) {
     }
 
     const currentState = yield call(contractInstance.methods.currentState().call);
-    yield put(Actions.setContractMetadata({currentState}));
-    
-  } catch(e) {
+    yield put(Actions.setContractMetadata({ currentState }));
+
+  } catch (e) {
     console.error(e);
   }
 }
 
 function* closeOracleVoting(action) {
   const { results, scoreA, scoreB } = action;
-  const { contractInstance, accounts } = yield call(getWeb3AndAccounts);
+  const { contractInstance, accounts } = yield call(getProviderAndAccounts);
   const fromAddress = accounts[0];
-  yield call(contractInstance.methods.closeOracleVoting(results, scoreA, scoreB).send, { 
+  yield call(contractInstance.methods.closeOracleVoting(results, scoreA, scoreB).send, {
     from: fromAddress
   });
 }
 
 function* claimTopEntry(action) {
-  const { contractInstance, accounts } = yield call(getWeb3AndAccounts);
+  const { contractInstance, accounts } = yield call(getProviderAndAccounts);
   const fromAddress = accounts[0];
-  yield call(contractInstance.methods.claimTopEntry(action.entryCompressed).send, { 
+  yield call(contractInstance.methods.claimTopEntry(action.entryCompressed).send, {
     from: fromAddress
   });
 }
 
 function* submitBracket(action) {
   try {
-    const { contractInstance, web3, accounts } = yield call(getWeb3AndAccounts);
+    const { contractInstance, provider, accounts } = yield call(getProviderAndAccounts);
     const fromAddress = accounts[0];
 
     const payload = action.payload;
     const picks = convertEncodedPicksToByteArray(payload.encodedPicks);
-    const scoreA = web3.utils.numberToHex(payload.topTeamScore);
-    const scoreB = web3.utils.numberToHex(payload.bottomTeamScore);
+    const scoreA = BigNumber.from(payload.topTeamScore).toHexString();
+    const scoreB = BigNumber.from(payload.bottomTeamScore).toHexString();
     const message = payload.message || '';
 
-    const submissionResult = yield call(contractInstance.methods.submitEntry(picks, scoreA, scoreB, message).send, { 
-      from: fromAddress
-    });
+    console.log(picks, scoreA, scoreB, message, fromAddress);
 
-    const entryIndex = submissionResult.events.EntrySubmitted.returnValues.entryIndex;
-    yield put(Actions.picksSubmittedSuccessfully(submissionResult.transactionHash, entryIndex));
-    
-  } catch(error) {
+    contractInstance.submitEntry(picks, scoreA, scoreB, message, {
+      from: fromAddress
+    })
+      .then((submissionResult) => {
+        console.log('YESSIR', submissionResult)
+
+        const entryIndex = submissionResult.events.EntrySubmitted.returnValues.entryIndex;
+        Actions.picksSubmittedSuccessfully(submissionResult.transactionHash, entryIndex);
+
+        console.log('here2')
+      })
+
+  } catch (error) {
     console.error(error);
     yield put(Actions.picksSubmissionFailed(error.message));
-  } 
+    console.log("ERRRRRRR")
+  }
 }
 
 const byteArrayToHex = (byteArray, add0x) => {
@@ -228,7 +240,7 @@ const byteArrayToHex = (byteArray, add0x) => {
 
 function* loadEntries() {
   try {
-    const { contractInstance, web3 } = yield call(getContractInstance, false);
+    const { contractInstance, provider } = yield call(getContractInstance, false);
     const events = yield call(() => new Promise((resolve, reject) => {
       contractInstance.getPastEvents('EntrySubmitted', {
         fromBlock: '0x70c3a0',
@@ -243,7 +255,7 @@ function* loadEntries() {
     }));
 
     const convertedEvents = events.map(event => {
-      const entryCompressedArray = web3.utils.toBN(event.returnValues.entryCompressed).toArray();
+      const entryCompressedArray = BigNumber.from(event.returnValues.entryCompressed).toArray();
       while (entryCompressedArray.length < 32) {
         // Pad the array until we get to 32 bytes
         entryCompressedArray.unshift(0);
@@ -272,10 +284,10 @@ function* loadEntries() {
     })
 
     yield put(Actions.setEntries(convertedEvents));
-    
-  } catch(e) {
+
+  } catch (e) {
     console.error(e);
-  } 
+  }
 }
 
 function* mySaga() {

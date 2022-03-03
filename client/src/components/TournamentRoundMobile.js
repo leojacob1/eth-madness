@@ -18,7 +18,7 @@ const styles = theme => {
     game: {
       marginBottom: theme.spacing.unit * 2
     },
-    score : {
+    score: {
 
     },
     finalScoreLabel: {
@@ -49,14 +49,16 @@ const styles = theme => {
  * Renders a 'Game' component for each game passed in the 'games' prop.
  */
 class TournamentRoundMobile extends Component {
-  
+
   createGame = (game) => {
     const { makePick, isEditable, classes, eliminatedTeamIds } = this.props;
 
-    const gameProps = { key: game.gameId, gameId: game.gameId, topSlotId: game.topSlotId,
-      bottomSlotId: game.bottomSlotId, currentPickSlotId: game.currentPickSlotId, 
+    const gameProps = {
+      key: game.gameId, gameId: game.gameId, topSlotId: game.topSlotId,
+      bottomSlotId: game.bottomSlotId, currentPickSlotId: game.currentPickSlotId,
       topTeam: game.topTeam, bottomTeam: game.bottomTeam, eliminatedTeamIds,
-      classes:{ root: classes.game }, gameResult: game.gameResult };
+      classes: { root: classes.game }, gameResult: game.gameResult
+    };
 
     return (<Game {...gameProps} makePick={makePick} isEditable={isEditable} />);
   }
@@ -73,9 +75,9 @@ class TournamentRoundMobile extends Component {
         {this.createGame(games[0])}
         <Grid container justify="center">
           <Grid item xs={4}>
-                {
-                  isEditable ?
-                  (
+            {
+              isEditable ?
+                (
                   <TextField
                     className={classes.score}
                     variant="outlined"
@@ -84,20 +86,20 @@ class TournamentRoundMobile extends Component {
                     value={topTeamScore}
                     onChange={(event) => changeBracketProperty('teamA', event.target.value)}
                   />)
-                  :
-                  (
-                    [<Typography key="score" align="center" variant="h4">{topTeamScore}</Typography>,
-                    <Typography key="label" align="center" >Winner Score</Typography>]
-                  )
-                }
+                :
+                (
+                  [<Typography key="score" align="center" variant="h4">{topTeamScore}</Typography>,
+                  <Typography key="label" align="center" >Winner Score</Typography>]
+                )
+            }
           </Grid>
           <Grid item xs={4} className={classes.finalScoreLabel}>
             <Typography align="center" variant="caption">Final<br />Score</Typography>
           </Grid>
           <Grid item xs={4}>
-                {
-                  isEditable ?
-                  (
+            {
+              isEditable ?
+                (
                   <TextField
                     className={classes.score}
                     variant="outlined"
@@ -106,17 +108,17 @@ class TournamentRoundMobile extends Component {
                     value={bottomTeamScore}
                     onChange={(event) => changeBracketProperty('teamB', event.target.value)}
                   />)
-                  :
-                  (
-                    [<Typography key="score"  align="center" variant="h4">{bottomTeamScore}</Typography>,
-                    <Typography key="label" align="center">Loser Score</Typography>]
-                  )
-                }
+                :
+                (
+                  [<Typography key="score" align="center" variant="h4">{bottomTeamScore}</Typography>,
+                  <Typography key="label" align="center">Loser Score</Typography>]
+                )
+            }
           </Grid>
           <Grid item xs={12}>
-                {
-                  isEditable ?
-                  (
+            {
+              isEditable ?
+                (
                   <TextField
                     variant="outlined"
                     helperText="Bracket Name (Optional)"
@@ -125,14 +127,14 @@ class TournamentRoundMobile extends Component {
                     value={message}
                     onChange={(event) => changeBracketProperty('bracketName', event.target.value)}
                   />)
-                  :
-                  null
-                }
+                :
+                null
+            }
           </Grid>
-          { isEditable && 
-          <Grid item xs={12}>
-            <Button className={classes.submitButton} color="primary" fullWidth variant="contained" disabled={!submitEnabled} onClick={() => this.submitPicks()} >Submit Bracket</Button>
-          </Grid>
+          {isEditable &&
+            <Grid item xs={12}>
+              <Button className={classes.submitButton} color="primary" fullWidth variant="contained" disabled={!submitEnabled} onClick={() => this.submitPicks()} >Submit Bracket</Button>
+            </Grid>
           }
         </Grid>
       </div>
@@ -140,12 +142,12 @@ class TournamentRoundMobile extends Component {
   }
 
   render() {
-    const {games, classes, isFinals, nextButtonName, nextButtonAction, prevButtonName, prevButtonAction, } = this.props;
+    const { games, classes, isFinals, nextButtonName, nextButtonAction, prevButtonName, prevButtonAction, } = this.props;
     if (isFinals) {
       return this.getFinalsComponent();
     } else {
-      const prevButton = prevButtonName ? ([<KeyboardArrowLeft />,prevButtonName]) : undefined;
-      const nextButton = nextButtonName ? ([nextButtonName,<KeyboardArrowRight />]) : undefined;
+      const prevButton = prevButtonName ? ([<KeyboardArrowLeft />, prevButtonName]) : undefined;
+      const nextButton = nextButtonName ? ([nextButtonName, <KeyboardArrowRight />]) : undefined;
       return (
         <div className={classes.root}>
           {games.map(g => this.createGame(g))}

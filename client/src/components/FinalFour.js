@@ -15,7 +15,7 @@ const styles = theme => ({
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between' ,
+    justifyContent: 'space-between',
     alignItems: 'center'
   },
   submitButton: {
@@ -67,7 +67,7 @@ class FinalFour extends Component {
   createGame = (game, makePick, roundNumber) => {
     const { isEditable, eliminatedTeamIds } = this.props;
 
-    return (<Game 
+    return (<Game
       key={game.gameId}
       gameId={game.gameId}
       topSlotId={game.topSlotId}
@@ -79,17 +79,18 @@ class FinalFour extends Component {
       isEditable={isEditable}
       gameResult={game.gameResult}
       eliminatedTeamIds={eliminatedTeamIds[roundNumber] || {}}
-      />);
+    />);
   }
 
   submitPicks = () => {
     const { submitPicks, encodedPicks, topTeamScore, bottomTeamScore, message } = this.props;
     submitPicks(encodedPicks, parseInt(topTeamScore), parseInt(bottomTeamScore), message);
+    console.log('encoded picks', encodedPicks);
   }
 
   getEditableFinalsComponent = () => {
-    const { games, classes, makePick, submitEnabled, message, changeBracketProperty, topTeamScore, bottomTeamScore} = this.props;
-    
+    const { games, classes, makePick, submitEnabled, message, changeBracketProperty, topTeamScore, bottomTeamScore } = this.props;
+
     return (
       <Paper className={classes.finals} >
         <Typography align="center" variant="h6">Championship</Typography>
@@ -102,7 +103,7 @@ class FinalFour extends Component {
             value={topTeamScore}
             onChange={(event) => changeBracketProperty('teamA', event.target.value)}
           />
-            { this.createGame(games[2], makePick) }
+          {this.createGame(games[2], makePick)}
           <TextField
             className={classes.score}
             variant="outlined"
@@ -128,12 +129,12 @@ class FinalFour extends Component {
   }
 
   getStaticFinalsComponent = () => {
-    const { games, classes, makePick, topTeamScore, bottomTeamScore, bracketId} = this.props;
-    
+    const { games, classes, makePick, topTeamScore, bottomTeamScore, bracketId } = this.props;
+
     const bracketLink = `${window.origin}/bracket/${bracketId}`;
     const tweetContent = `Check out my March Madness bracket - stored in a smart contract via ethmadness.com built by @nodesmith %23ethmadness. ${bracketLink}`
     const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetContent}`;
-    
+
     return (
       <Paper className={classes.finals} >
         <Typography align="center" variant="h6">Championship</Typography>
@@ -143,7 +144,7 @@ class FinalFour extends Component {
             <Typography align="center" >{topTeamScore}</Typography>
             <Typography align="center" variant="caption">Winner Score</Typography>
           </div>
-          { this.createGame(games[2], makePick, 6) }
+          {this.createGame(games[2], makePick, 6)}
           <div className={classes.staticScoreContainer} >
             <Typography align="center" >{bottomTeamScore}</Typography>
             <Typography align="center" variant="caption">Loser Score</Typography>
@@ -160,18 +161,18 @@ class FinalFour extends Component {
   }
 
   render = () => {
-    const { games, classes, makePick, isEditable} = this.props;
+    const { games, classes, makePick, isEditable } = this.props;
     return (
       <div className={classes.root}>
         <div className={classes.games}>
           <div className={classes.finalFour}>
             <Typography align="center" variant="caption">Final Four</Typography>
-            { this.createGame(games[0], makePick, 5) }
+            {this.createGame(games[0], makePick, 5)}
           </div>
-          { isEditable ? this.getEditableFinalsComponent() : this.getStaticFinalsComponent() }
+          {isEditable ? this.getEditableFinalsComponent() : this.getStaticFinalsComponent()}
           <div className={classes.finalFour}>
             <Typography align="center" variant="caption">Final Four</Typography>
-            { this.createGame(games[1], makePick, 5) }
+            {this.createGame(games[1], makePick, 5)}
           </div>
         </div>
       </div>

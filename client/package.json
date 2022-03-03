@@ -5,7 +5,9 @@
   "dependencies": {
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
+    "babel-jest": "^23.6.0",
     "connected-react-router": "^6.3.2",
+    "ethers": "^5.5.4",
     "faker": "^4.1.0",
     "lodash": "^4.17.11",
     "query-string": "^6.4.0",
