@@ -13,5 +13,15 @@
       "stateMutability": "nonpayable",
       "type": "function"
     }
-  ]
+  ],
+  "bytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "sourceMap": "",
+    "linkReferences": {}
+  }
 }

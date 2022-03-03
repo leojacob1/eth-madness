@@ -17,74 +17,108 @@ contract ContractTest is DSTest {
         1554879599,
         1555484399
     ];
-    uint8 one = 22;
-    uint8 two = 105;
-    uint8 three = 89;
-    uint8 four = 154;
-    uint8 five = 154;
-    uint8 six = 153;
-    uint8 seven = 166;
-    uint8 eight = 169;
-    uint8 nine = 90;
-    uint8 ten = 154;
-    uint8 eleven = 102;
-    uint8 twelve = 106;
-    uint8 thirteen = 86;
-    uint8 fourteen = 153;
-    uint8 fifteen = 101;
-    uint8 sixteen = 165;
-
-    function concat(
-        bytes1 b1,
-        bytes1 b2,
-        bytes1 b3,
-        bytes1 b4,
-        bytes1 b5,
-        bytes1 b6,
-        bytes1 b7,
-        bytes1 b8,
-        bytes1 b9,
-        bytes1 b10,
-        bytes1 b11,
-        bytes1 b12,
-        bytes1 b13,
-        bytes1 b14,
-        bytes1 b15,
-        bytes1 b16
-    ) public pure returns (bytes memory) {
-        bytes memory result = new bytes(16);
-        assembly {
-            mstore(add(result, 1), b1)
-            mstore(add(result, 2), b2)
-            mstore(add(result, 3), b3)
-            mstore(add(result, 4), b4)
-            mstore(add(result, 5), b5)
-            mstore(add(result, 6), b6)
-            mstore(add(result, 7), b7)
-            mstore(add(result, 8), b8)
-            mstore(add(result, 9), b9)
-            mstore(add(result, 10), b10)
-            mstore(add(result, 11), b11)
-            mstore(add(result, 12), b12)
-            mstore(add(result, 13), b13)
-            mstore(add(result, 14), b14)
-            mstore(add(result, 15), b15)
-            mstore(add(result, 16), b16)
-        }
-        return result;
-    }
-
-    function toBytes(uint8 x) private pure returns (bytes memory b) {
-        b = new bytes(1);
-        assembly {
-            mstore(add(b, 1), x)
-        }
-    }
-
+    string encodedPicks =
+        "00010110011010010101100110011010100110101001100110100110101010010101101010011010011001100110101001010110100110010110010110100101";
     uint64 scoreA = 0x5f;
     uint64 scoreB = 0x44;
     string bracketName = "reboot Pizza Investment Account";
     address fromAddress = 0x9bEF1f52763852A339471f298c6780e158E43A68;
+
+    function substring(
+        string memory str,
+        uint256 startIndex,
+        uint256 endIndex
+    ) private pure returns (string memory) {
+        bytes memory strBytes = bytes(str);
+        bytes memory result = new bytes(endIndex - startIndex);
+        for (uint256 i = startIndex; i < endIndex; i++) {
+            result[i - startIndex] = strBytes[i];
+        }
+        return string(result);
+    }
+
+    function concat(
+        bytes memory b1,
+        bytes1 b2,
+        uint256 currentSize
+    ) public returns (bytes memory) {
+        uint256 newSize = currentSize + 1;
+        bytes memory result = new bytes(newSize);
+        emit log_uint(newSize);
+        assembly {
+            mstore(add(result, currentSize), b1)
+            mstore(add(result, newSize), b2)
+        }
+        return result;
+    }
+
+    function convertEncodedPicksToByteArray(string memory bitString)
+        private
+        returns (bytes16)
+    {
+        require(bytes(bitString).length % 8 == 0, "Wrong size bit string");
+
+        bytes memory result = new bytes(16);
+        for (uint8 i = 0; i < bytes(bitString).length; i += 8) {
+            result = concat(
+                result,
+                bytes1(
+                    convertBitStringToNumber(substring(bitString, i, i + 8))
+                ),
+                i / 8
+            );
+        }
+
+        emit log_uint(result.length);
+
+        return bytes16(result);
+    }
+
+    function convertBitStringToNumber(string memory bits)
+        private
+        returns (uint8)
+    {
+        require(bytes(bits).length == 8, "Wrong size bit string");
+        uint256 result = 0;
+        for (uint256 i = uint256(bytes(bits).length - 1); i > 0; i--) {
+            if (bytes(bits)[i] == bytes1("1")) {
+                uint256 power = uint256((bytes(bits).length - i) - 1);
+                result += uint256(2**power);
+            }
+        }
+        return uint8(result);
+    }
+
+    function stringToBytes16(string memory source)
+        public
+        pure
+        returns (bytes16 result)
+    {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly {
+            result := mload(add(source, 16))
+        }
+    }
+
+    // function stringToUint(string memory s)
+    //     private
+    //     pure
+    //     returns (uint256 result)
+    // {
+    //     bytes memory b = bytes(s);
+    //     uint256 i;
+    //     result = 0;
+    //     for (i = 0; i < b.length; i++) {
+    //         uint256 c = uint256(b[i]);
+    //         if (c >= 48 && c <= 57) {
+    //             result = result * 10 + (c - 48);
+    //         }
+    //     }
+    // }
 
     function setUp() public {
         ethMadness = new EthMadness(transitionTimes);
@@ -92,26 +126,15 @@ contract ContractTest is DSTest {
 
     function testExample() public {
         cheats.prank(fromAddress);
-        bytes16 picksBytes16 = bytes16(
-            concat(
-                bytes1(toBytes(one)),
-                bytes1(toBytes(two)),
-                bytes1(toBytes(three)),
-                bytes1(toBytes(four)),
-                bytes1(toBytes(five)),
-                bytes1(toBytes(six)),
-                bytes1(toBytes(seven)),
-                bytes1(toBytes(eight)),
-                bytes1(toBytes(nine)),
-                bytes1(toBytes(ten)),
-                bytes1(toBytes(eleven)),
-                bytes1(toBytes(twelve)),
-                bytes1(toBytes(thirteen)),
-                bytes1(toBytes(fourteen)),
-                bytes1(toBytes(fifteen)),
-                bytes1(toBytes(sixteen))
-            )
+        emit log(encodedPicks);
+        // bytes16 picksBytes16 = stringToBytes16(encodedPicks);
+        // emit log_bytes32(bytes32(picksBytes16));
+
+        ethMadness.submitEntry(
+            convertEncodedPicksToByteArray(encodedPicks),
+            scoreA,
+            scoreB,
+            bracketName
         );
-        ethMadness.submitEntry(picksBytes16, scoreA, scoreB, bracketName);
     }
 }
