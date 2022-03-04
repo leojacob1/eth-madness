@@ -24,9 +24,12 @@ class SubmitPicksStore {
   }
 
   async getConnectedWallet() {
-    this.userAddress = await window.ethereum.request({
+    const userAddress = await window.ethereum.request({
       method: "eth_requestAccounts",
     });
+    if (userAddress.length) {
+      this.userAddress = userAddress[0];
+    }
   }
 
   signInWithEthereum(firebase, address) {

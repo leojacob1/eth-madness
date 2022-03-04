@@ -1,4 +1,4 @@
-import React, { Component, useContext } from 'react';
+import React, { Component, useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles, Paper, Button, Typography, TextField } from '@material-ui/core';
 import Game, { HEIGHT } from './Game';
@@ -73,6 +73,15 @@ const styles = theme => ({
  */
 const FinalFour = observer((props) => {
   const submitPicksStore = useContext(SubmitPicksContext);
+  const [txnHash, setTxnHash] = useState();
+  const [entryIndex, setEntryIndex] = useState();
+
+  useEffect(() => {
+    if (txnHash && entryIndex) {
+      console.log('Ladies and gentlemen, we got em', txnHash, entryIndex);
+      submitPicksStore.setPicksSuccess(txnHash, entryIndex);
+    }
+  }, [txnHash, entryIndex])
   const createGame = (game, makePick, roundNumber) => {
     const { isEditable, eliminatedTeamIds } = props;
 
@@ -94,31 +103,30 @@ const FinalFour = observer((props) => {
   const submitPicks = async () => {
     const { encodedPicks, topTeamScore, bottomTeamScore, message, ethersProps } = props;
     console.log('final four', ethersProps)
-    let submissionResult = null;
-    const { contractInstance, provider, accounts } = await getProviderAndAccounts();
-    const fromAddress = accounts[0];
 
-    // const filter = contractInstance.filters.EntrySubmitted(fromAddress, null, null, null);
-    // contractInstance.on(filter, (submitter, entryCompressed, entryIndex) => {
-    //   // The to will always be "address"
-    //   console.log('submitter', submitter, submissionResult, entryIndex);
-    // });
+    const filter = ethersProps.ethMadnessContract.filters.EntrySubmitted(submitPicksStore.userAddress, null, null, null);
+    ethersProps.ethMadnessContract.on(filter, (submitter, entryCompressed, respEntryIndex) => {
+      // The to will always be "address"
+      console.log('submitter', submitter, entryCompressed, respEntryIndex);
+      setEntryIndex(respEntryIndex);
+    });
 
     const picks = convertEncodedPicksToByteArray(encodedPicks);
     const scoreA = BigNumber.from(topTeamScore).toHexString();
     const scoreB = BigNumber.from(bottomTeamScore).toHexString();
-    const bracketName = bracketName || '';
+    const bracketName = message || '';
 
     submitPicksStore.submitPicks();
     ethersProps.ethMadnessContract.submitEntry(picks, scoreA, scoreB, bracketName, {
-      from: fromAddress
+      from: submitPicksStore.userAddress
     })
       .then((txn) => {
-        console.log('hell ya', txn)
-        submitPicksStore.setPicksSuccess(null, 35);
+        console.log('hell ya', txn.hash)
+        setTxnHash(txn.hash);
       })
-      .catch(() => {
-        submitPicksStore.setPicksFailure('Could not access network');
+      .catch((err) => {
+        console.log(err)
+        submitPicksStore.setPicksFailure('oops');
       })
   }
 
