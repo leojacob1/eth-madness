@@ -6,6 +6,7 @@ import Hidden from '@material-ui/core/Hidden';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { NavLink } from 'react-router-dom';
+import ConnectButton from './ConnectButton';
 
 const HEADER_HEIGHT = 60;
 
@@ -53,20 +54,22 @@ function SimpleAppBar(props) {
     <div className={classes.root}>
       <AppBar position="fixed" className={`${classes.navbar} mui-fixed`}>
         <Toolbar>
-          <NavLink to={{ pathname: `/leaders`, search: props.location.search}} className={classes.header}>
+          <NavLink to={{ pathname: `/leaders`, search: props.location.search }} className={classes.header}>
             <Typography align="right" className={classes.largerFont} variant="overline">Leaderboard</Typography>
           </NavLink>
-          <NavLink to={{ pathname: `/`, search: props.location.search}}>
+          <NavLink to={{ pathname: `/`, search: props.location.search }}>
             <Hidden smUp>
               <img className={classes.logoSmall} src="/logoSmall.png" alt="Eth Madness Logo" />
             </Hidden>
             <Hidden xsDown>
-             <img className={classes.logo} src="/logo.png" alt="Eth Madness Logo" />
+              <img className={classes.logo} src="/logo.png" alt="Eth Madness Logo" />
             </Hidden>
           </NavLink>
-          <NavLink to={{ pathname: `/enter`, search: props.location.search}} className={classes.header}>
+          <NavLink to={{ pathname: `/enter`, search: props.location.search }} className={classes.header}>
             <Typography className={classes.largerFont} variant="overline">Create Bracket</Typography>
-          </NavLink>        </Toolbar>
+          </NavLink>
+          <ConnectButton />
+        </Toolbar>
       </AppBar>
     </div>
   );

@@ -179,8 +179,8 @@
       }
     },
     "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/EthMadness.sol": {
-      "lastModificationDate": 1646293084123,
-      "contentHash": "00d381caf2d2e518f999f22b4aeb471f",
+      "lastModificationDate": 1646333209177,
+      "contentHash": "5a17275fc134ba9cac8b556483d1626f",
       "sourceName": "src/EthMadness.sol",
       "solcConfig": {
         "settings": {

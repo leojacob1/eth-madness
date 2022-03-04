@@ -51,7 +51,7 @@ class BracketMobile extends Component {
   state = { currentRound: 1, numRounds: 6 }
 
   createRound = (roundNumber) => {
-    const { eliminatedTeamIds, topTeamScore, bottomTeamScore, message, encodedPicks, submitPicks, submitEnabled, numRounds, isEditable, games, changeBracketProperty } = this.props;
+    const { eliminatedTeamIds, topTeamScore, bottomTeamScore, message, encodedPicks, submitEnabled, numRounds, isEditable, games, changeBracketProperty } = this.props;
     const gamesInRound = games.filter(g => g.round === roundNumber);
 
     const prevButtonName = roundNumber === 1 ? null : roundDescriptions[roundNumber - 1];
@@ -68,8 +68,7 @@ class BracketMobile extends Component {
         roundNumber={roundNumber}
         isEditable={isEditable}
         submitEnabled={submitEnabled}
-        changeBracketProperty={changeBracketProperty} 
-        submitPicks={submitPicks}
+        changeBracketProperty={changeBracketProperty}
         encodedPicks={encodedPicks}
         topTeamScore={topTeamScore}
         bottomTeamScore={bottomTeamScore}
@@ -79,8 +78,8 @@ class BracketMobile extends Component {
         nextButtonName={nextButtonName}
         nextButtonAction={nextButtonAction}
         eliminatedTeamIds={eliminatedTeamIds[roundNumber] || {}}
-        />
-      );
+      />
+    );
   }
 
   makePickIntercepted = (gameId, teamId, slotId) => {
@@ -110,7 +109,7 @@ class BracketMobile extends Component {
 
   changeRound = (newRound) => {
     this.setState({ currentRound: newRound }, () => {
-      document.getElementById('gamesList').scrollTo(0,0);
+      document.getElementById('gamesList').scrollTo(0, 0);
     });
   }
 
@@ -127,7 +126,7 @@ class BracketMobile extends Component {
       <Grid container className={classes.root}>
         <Grid item xs={12}>
           <div className={classes.header}>
-          <MobileStepper
+            <MobileStepper
               steps={numRounds}
               position="static"
               activeStep={currentRound - 1}
@@ -147,20 +146,20 @@ class BracketMobile extends Component {
             <div className={classes.roundTitle}>
               <Typography align="center" variant="h6">{roundDescriptions[currentRound]}</Typography>
             </div>
-            </div>
-          </Grid>
-          <Grid item xs={12} className={classes.roundTitle}>
-            <div className={classes.spacer}></div>
-          </Grid>
-            <div id="gamesList" className={classes.gamesList} >
-              <SwipeableViews
-              index={currentRound - 1}
-              onChangeIndex={this.handleStepChange}>
-              { roundViews }
-            </SwipeableViews>
-              </div>
+          </div>
         </Grid>
-          
+        <Grid item xs={12} className={classes.roundTitle}>
+          <div className={classes.spacer}></div>
+        </Grid>
+        <div id="gamesList" className={classes.gamesList} >
+          <SwipeableViews
+            index={currentRound - 1}
+            onChangeIndex={this.handleStepChange}>
+            {roundViews}
+          </SwipeableViews>
+        </div>
+      </Grid>
+
     );
   }
 }
@@ -170,7 +169,6 @@ BracketMobile.propTypes = {
   numRounds: PropTypes.number.isRequired,
   games: PropTypes.array.isRequired,
   makePick: PropTypes.func.isRequired,
-  submitPicks: PropTypes.func.isRequired,
   submitEnabled: PropTypes.bool.isRequired,
   encodedPicks: PropTypes.string,
   topTeamScore: PropTypes.string.isRequired,

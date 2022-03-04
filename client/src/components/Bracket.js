@@ -77,14 +77,14 @@ class Bracket extends Component {
     const roundElements = rounds.map((round, i) => {
       return (
         <TournamentRound
-          classes={{root: classes[`roundMargin_${side}_${i}`]}}
+          classes={{ root: classes[`roundMargin_${side}_${i}`] }}
           makePick={makePick}
           key={round.roundNumber}
           games={round.games}
           roundNumber={round.roundNumber}
           eliminatedTeamIds={eliminatedTeamIds[round.roundNumber] || {}}
           isEditable={isEditable}
-           />);
+        />);
     });
 
     return (
@@ -95,7 +95,7 @@ class Bracket extends Component {
   }
 
   render = () => {
-    const { bracketId, eliminatedTeamIds, isEditable, games, classes, submitPicks, submitEnabled, makePick, encodedPicks, topTeamScore, bottomTeamScore, message, changeBracketProperty  } = this.props;
+    const { bracketId, eliminatedTeamIds, isEditable, games, classes, submitEnabled, makePick, encodedPicks, topTeamScore, bottomTeamScore, message, changeBracketProperty } = this.props;
 
     const gamesForRegions = {
       final_four: games.filter(g => g.region === 'final_four'),
@@ -119,10 +119,9 @@ class Bracket extends Component {
         </div>
         <div className={classes.finalFourContainer}>
           <FinalFour
-            classes={{root: classes.finalFour}}
+            classes={{ root: classes.finalFour }}
             games={gamesForRegions.final_four}
             makePick={makePick}
-            submitPicks={submitPicks}
             submitEnabled={submitEnabled}
             encodedPicks={encodedPicks}
             topTeamScore={topTeamScore}
@@ -132,7 +131,7 @@ class Bracket extends Component {
             isEditable={isEditable}
             eliminatedTeamIds={eliminatedTeamIds || {}}
             bracketId={bracketId}
-            />
+          />
         </div>
       </div>
     );
@@ -144,7 +143,6 @@ Bracket.propTypes = {
   numRounds: PropTypes.number.isRequired,
   games: PropTypes.array.isRequired,
   makePick: PropTypes.func.isRequired,
-  submitPicks: PropTypes.func.isRequired,
   submitEnabled: PropTypes.bool.isRequired,
   encodedPicks: PropTypes.string,
   topTeamScore: PropTypes.string.isRequired,

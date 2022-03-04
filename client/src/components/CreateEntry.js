@@ -49,7 +49,7 @@ const styles = theme => ({
  */
 class CreateEntry extends Component {
   render = () => {
-    const { games, classes, makePick, numRounds, submitEnabled, submitPicks, encodedPicks, topTeamScore, bottomTeamScore, message, changeBracketProperty } = this.props;
+    const { games, classes, makePick, numRounds, submitEnabled, encodedPicks, topTeamScore, bottomTeamScore, message, changeBracketProperty } = this.props;
     const createEntryProps = _.pick(this.props, 'perfectPicks', 'makeRandomPicks', 'clearPicks', 'topSeedPicks');
     return (
       <div className={classes.root}>
@@ -62,7 +62,6 @@ class CreateEntry extends Component {
             games={games}
             makePick={makePick}
             numRounds={numRounds}
-            submitPicks={submitPicks}
             submitEnabled={submitEnabled}
             encodedPicks={encodedPicks}
             topTeamScore={topTeamScore}
@@ -79,7 +78,6 @@ class CreateEntry extends Component {
             games={games}
             makePick={makePick}
             numRounds={numRounds}
-            submitPicks={submitPicks}
             submitEnabled={submitEnabled}
             encodedPicks={encodedPicks}
             topTeamScore={topTeamScore}
@@ -105,7 +103,6 @@ CreateEntry.propTypes = {
   makeRandomPicks: PropTypes.func.isRequired,
   topSeedPicks: PropTypes.func.isRequired,
   clearPicks: PropTypes.func.isRequired,
-  submitPicks: PropTypes.func.isRequired,
   submitEnabled: PropTypes.bool.isRequired,
   perfectPicks: PropTypes.func.isRequired,
   encodedPicks: PropTypes.string,

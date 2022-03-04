@@ -167,7 +167,7 @@ contract EthMadness is Ownable {
         uint64 scoreA,
         uint64 scoreB,
         string memory bracketName
-    ) public {
+    ) public returns (uint256) {
         require(
             currentState == ContestState.OPEN_FOR_ENTRIES,
             "Must be in the open for entries state"
@@ -198,6 +198,7 @@ contract EthMadness is Ownable {
         Entrant memory entrant = Entrant(msg.sender, entryCount);
         entries[entryCompressed] = entrant;
         entryCount++;
+        return entryCount;
     }
 
     // Adds an allowerd oracle who will vote on the results of the contest. Only the contract owner can do this

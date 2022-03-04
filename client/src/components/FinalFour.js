@@ -1,7 +1,14 @@
-import React, { Component } from 'react';
+import React, { Component, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles, Paper, Button, Typography, TextField } from '@material-ui/core';
 import Game, { HEIGHT } from './Game';
+import { SubmitPicksContext, UserContext } from '../store/context';
+import { observer } from 'mobx-react';
+import { withEthers } from '../Ethers';
+import { compose } from 'recompose';
+import { getProviderAndAccounts } from '../sagas';
+import { utils, BigNumber, ethers } from 'ethers';
+import { convertEncodedPicksToByteArray } from '../utils/converters';
 
 const styles = theme => ({
   root: {
@@ -63,9 +70,10 @@ const styles = theme => ({
  * Component that sits in the middle of a bracket. This component shows the two final 
  * four games, and also the large championship component.
  */
-class FinalFour extends Component {
-  createGame = (game, makePick, roundNumber) => {
-    const { isEditable, eliminatedTeamIds } = this.props;
+const FinalFour = observer((props) => {
+  const submitPicksStore = useContext(SubmitPicksContext);
+  const createGame = (game, makePick, roundNumber) => {
+    const { isEditable, eliminatedTeamIds } = props;
 
     return (<Game
       key={game.gameId}
@@ -82,14 +90,41 @@ class FinalFour extends Component {
     />);
   }
 
-  submitPicks = () => {
-    const { submitPicks, encodedPicks, topTeamScore, bottomTeamScore, message } = this.props;
-    submitPicks(encodedPicks, parseInt(topTeamScore), parseInt(bottomTeamScore), message);
+  const submitPicks = async () => {
+    const { encodedPicks, topTeamScore, bottomTeamScore, message, ethersProps } = props;
+    console.log('final four', ethersProps)
+    let submissionResult = null;
+    const { contractInstance, provider, accounts } = await getProviderAndAccounts();
+    const fromAddress = accounts[0];
+
+    // const filter = contractInstance.filters.EntrySubmitted(fromAddress, null, null, null);
+    // contractInstance.on(filter, (submitter, entryCompressed, entryIndex) => {
+    //   // The to will always be "address"
+    //   console.log('submitter', submitter, submissionResult, entryIndex);
+    // });
+
+    const picks = convertEncodedPicksToByteArray(encodedPicks);
+    const scoreA = BigNumber.from(topTeamScore).toHexString();
+    const scoreB = BigNumber.from(bottomTeamScore).toHexString();
+    const bracketName = bracketName || '';
+
+    console.log('submitBracket', picks, scoreA, scoreB, bracketName, fromAddress);
+
+    ethersProps.ethMadnessContract.submitEntry(picks, scoreA, scoreB, bracketName, {
+      from: fromAddress
+    })
+      .then(() => {
+        console.log('hell ya')
+      })
+      .catch(() => {
+        submitPicksStore.setPicksFailure('Fuck');
+      })
+    submitPicksStore.submitPicks();
     console.log('encoded picks', encodedPicks);
   }
 
-  getEditableFinalsComponent = () => {
-    const { games, classes, makePick, submitEnabled, message, changeBracketProperty, topTeamScore, bottomTeamScore } = this.props;
+  const getEditableFinalsComponent = () => {
+    const { games, classes, makePick, submitEnabled, message, changeBracketProperty, topTeamScore, bottomTeamScore } = props;
 
     return (
       <Paper className={classes.finals} >
@@ -103,7 +138,7 @@ class FinalFour extends Component {
             value={topTeamScore}
             onChange={(event) => changeBracketProperty('teamA', event.target.value)}
           />
-          {this.createGame(games[2], makePick)}
+          {createGame(games[2], makePick)}
           <TextField
             className={classes.score}
             variant="outlined"
@@ -123,13 +158,13 @@ class FinalFour extends Component {
             onChange={(event) => changeBracketProperty('bracketName', event.target.value)}
           />
         </div>
-        <Button className={classes.submitButton} color="primary" fullWidth variant="contained" disabled={!submitEnabled} onClick={() => this.submitPicks()} >Submit Bracket</Button>
+        <Button className={classes.submitButton} color="primary" fullWidth variant="contained" disabled={!submitEnabled || !submitPicksStore.userAddress} onClick={() => submitPicks()} >Submit Bracket</Button>
       </Paper>
     )
   }
 
-  getStaticFinalsComponent = () => {
-    const { games, classes, makePick, topTeamScore, bottomTeamScore, bracketId } = this.props;
+  const getStaticFinalsComponent = () => {
+    const { games, classes, makePick, topTeamScore, bottomTeamScore, bracketId } = props;
 
     const bracketLink = `${window.origin}/bracket/${bracketId}`;
     const tweetContent = `Check out my March Madness bracket - stored in a smart contract via ethmadness.com built by @nodesmith %23ethmadness. ${bracketLink}`
@@ -144,7 +179,7 @@ class FinalFour extends Component {
             <Typography align="center" >{topTeamScore}</Typography>
             <Typography align="center" variant="caption">Winner Score</Typography>
           </div>
-          {this.createGame(games[2], makePick, 6)}
+          {createGame(games[2], makePick, 6)}
           <div className={classes.staticScoreContainer} >
             <Typography align="center" >{bottomTeamScore}</Typography>
             <Typography align="center" variant="caption">Loser Score</Typography>
@@ -160,31 +195,28 @@ class FinalFour extends Component {
     )
   }
 
-  render = () => {
-    const { games, classes, makePick, isEditable } = this.props;
-    return (
-      <div className={classes.root}>
-        <div className={classes.games}>
-          <div className={classes.finalFour}>
-            <Typography align="center" variant="caption">Final Four</Typography>
-            {this.createGame(games[0], makePick, 5)}
-          </div>
-          {isEditable ? this.getEditableFinalsComponent() : this.getStaticFinalsComponent()}
-          <div className={classes.finalFour}>
-            <Typography align="center" variant="caption">Final Four</Typography>
-            {this.createGame(games[1], makePick, 5)}
-          </div>
+  const { games, classes, makePick, isEditable } = props;
+  return (
+    <div className={classes.root}>
+      <div className={classes.games}>
+        <div className={classes.finalFour}>
+          <Typography align="center" variant="caption">Final Four</Typography>
+          {createGame(games[0], makePick, 5)}
+        </div>
+        {isEditable ? getEditableFinalsComponent() : getStaticFinalsComponent()}
+        <div className={classes.finalFour}>
+          <Typography align="center" variant="caption">Final Four</Typography>
+          {createGame(games[1], makePick, 5)}
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+})
 
 FinalFour.propTypes = {
   classes: PropTypes.object.isRequired,
   games: PropTypes.array.isRequired,
   submitEnabled: PropTypes.bool.isRequired,
-  submitPicks: PropTypes.func.isRequired,
   encodedPicks: PropTypes.string,
   topTeamScore: PropTypes.string.isRequired,
   bottomTeamScore: PropTypes.string.isRequired,
@@ -195,4 +227,4 @@ FinalFour.propTypes = {
   bracketId: PropTypes.number
 };
 
-export default withStyles(styles)(FinalFour);
+export default compose(withEthers, withStyles(styles))(FinalFour);

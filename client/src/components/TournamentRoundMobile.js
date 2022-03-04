@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
@@ -9,6 +9,9 @@ import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 
 import Game from './Game';
+import { SubmitPicksContext, UserContext } from '../store/context';
+import { compose } from 'recompose';
+import { withEthers } from '../Ethers';
 
 const styles = theme => {
   const result = {
@@ -48,10 +51,11 @@ const styles = theme => {
 /**
  * Renders a 'Game' component for each game passed in the 'games' prop.
  */
-class TournamentRoundMobile extends Component {
+const TournamentRoundMobile = (props) => {
+  const submitPicksStore = useContext(SubmitPicksContext);
 
-  createGame = (game) => {
-    const { makePick, isEditable, classes, eliminatedTeamIds } = this.props;
+  const createGame = (game) => {
+    const { makePick, isEditable, classes, eliminatedTeamIds } = props;
 
     const gameProps = {
       key: game.gameId, gameId: game.gameId, topSlotId: game.topSlotId,
@@ -63,16 +67,17 @@ class TournamentRoundMobile extends Component {
     return (<Game {...gameProps} makePick={makePick} isEditable={isEditable} />);
   }
 
-  submitPicks = () => {
-    const { submitPicks, encodedPicks, topTeamScore, bottomTeamScore, message } = this.props;
-    submitPicks(encodedPicks, parseInt(topTeamScore), parseInt(bottomTeamScore), message);
+  const submitPicks = () => {
+    const { encodedPicks, topTeamScore, bottomTeamScore, message } = props;
+    console.log('tourney round', props.ethersProps.ethMadnessContract)
+    submitPicksStore.submitPicks(props.ethersProps.ethMadnessContract, encodedPicks, parseInt(topTeamScore), parseInt(bottomTeamScore), message);
   }
 
-  getFinalsComponent = () => {
-    const { classes, games, message, submitEnabled, topTeamScore, bottomTeamScore, isEditable, changeBracketProperty } = this.props;
+  const getFinalsComponent = () => {
+    const { classes, games, message, submitEnabled, topTeamScore, bottomTeamScore, isEditable, changeBracketProperty } = props;
     return (
       <div className={classes.root}>
-        {this.createGame(games[0])}
+        {createGame(games[0])}
         <Grid container justify="center">
           <Grid item xs={4}>
             {
@@ -133,7 +138,7 @@ class TournamentRoundMobile extends Component {
           </Grid>
           {isEditable &&
             <Grid item xs={12}>
-              <Button className={classes.submitButton} color="primary" fullWidth variant="contained" disabled={!submitEnabled} onClick={() => this.submitPicks()} >Submit Bracket</Button>
+              <Button className={classes.submitButton} color="primary" fullWidth variant="contained" disabled={!submitEnabled || !submitPicksStore.userAddress} onClick={() => submitPicks()} >Submit Bracket</Button>
             </Grid>
           }
         </Grid>
@@ -141,23 +146,21 @@ class TournamentRoundMobile extends Component {
     );
   }
 
-  render() {
-    const { games, classes, isFinals, nextButtonName, nextButtonAction, prevButtonName, prevButtonAction, } = this.props;
-    if (isFinals) {
-      return this.getFinalsComponent();
-    } else {
-      const prevButton = prevButtonName ? ([<KeyboardArrowLeft />, prevButtonName]) : undefined;
-      const nextButton = nextButtonName ? ([nextButtonName, <KeyboardArrowRight />]) : undefined;
-      return (
-        <div className={classes.root}>
-          {games.map(g => this.createGame(g))}
-          <div className={classes.navButtons}>
-            <Button onClick={prevButtonAction}>{prevButton}</Button>
-            <Button onClick={nextButtonAction}>{nextButton}</Button>
-          </div>
+  const { games, classes, isFinals, nextButtonName, nextButtonAction, prevButtonName, prevButtonAction, } = props;
+  if (isFinals) {
+    return getFinalsComponent();
+  } else {
+    const prevButton = prevButtonName ? ([<KeyboardArrowLeft />, prevButtonName]) : undefined;
+    const nextButton = nextButtonName ? ([nextButtonName, <KeyboardArrowRight />]) : undefined;
+    return (
+      <div className={classes.root}>
+        {games.map(g => createGame(g))}
+        <div className={classes.navButtons}>
+          <Button onClick={prevButtonAction}>{prevButton}</Button>
+          <Button onClick={nextButtonAction}>{nextButton}</Button>
         </div>
-      );
-    }
+      </div>
+    );
   }
 }
 
@@ -169,7 +172,6 @@ TournamentRoundMobile.propTypes = {
 
   isFinals: PropTypes.bool.isRequired,
   submitEnabled: PropTypes.bool.isRequired,
-  submitPicks: PropTypes.func.isRequired,
   encodedPicks: PropTypes.string,
   topTeamScore: PropTypes.string.isRequired,
   bottomTeamScore: PropTypes.string.isRequired,
@@ -184,4 +186,4 @@ TournamentRoundMobile.propTypes = {
   eliminatedTeamIds: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(TournamentRoundMobile);
+export default compose(withEthers, withStyles(styles))(TournamentRoundMobile);

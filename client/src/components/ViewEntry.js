@@ -48,7 +48,7 @@ const styles = theme => ({
 class ViewEntry extends Component {
   render = () => {
     const { bracketName, transactionHash, games, classes, makePick, numRounds, submitEnabled,
-            submitPicks, encodedPicks, topTeamScore, bottomTeamScore, message, changeBracketProperty, eliminatedTeamIds, bracketScore, bracketId } = this.props;
+      encodedPicks, topTeamScore, bottomTeamScore, message, changeBracketProperty, eliminatedTeamIds, bracketScore, bracketId } = this.props;
     return (
       <div className={classes.root}>
         <div className={classes.titleBar}>
@@ -63,38 +63,36 @@ class ViewEntry extends Component {
           </div>
         </div>
         <Hidden smDown>
-        <Bracket
-          classes={{root: classes.bracket}}
-          games={games}
-          makePick={makePick}
-          numRounds={numRounds}
-          submitPicks={submitPicks}
-          submitEnabled={submitEnabled}
-          encodedPicks={encodedPicks}
-          topTeamScore={topTeamScore}
-          bottomTeamScore={bottomTeamScore}
-          message={message}
-          changeBracketProperty={changeBracketProperty}
-          isEditable={false}
-          eliminatedTeamIds={eliminatedTeamIds}
-          bracketId={bracketId}
+          <Bracket
+            classes={{ root: classes.bracket }}
+            games={games}
+            makePick={makePick}
+            numRounds={numRounds}
+            submitEnabled={submitEnabled}
+            encodedPicks={encodedPicks}
+            topTeamScore={topTeamScore}
+            bottomTeamScore={bottomTeamScore}
+            message={message}
+            changeBracketProperty={changeBracketProperty}
+            isEditable={false}
+            eliminatedTeamIds={eliminatedTeamIds}
+            bracketId={bracketId}
           />
         </Hidden>
         <Hidden mdUp>
-        <BracketMobile
-          classes={{root: classes.bracket}}
-          games={games}
-          makePick={makePick}
-          numRounds={numRounds}
-          submitPicks={submitPicks}
-          submitEnabled={submitEnabled}
-          encodedPicks={encodedPicks}
-          topTeamScore={topTeamScore}
-          bottomTeamScore={bottomTeamScore}
-          message={message}
-          changeBracketProperty={changeBracketProperty}
-          isEditable={false}
-          eliminatedTeamIds={eliminatedTeamIds}
+          <BracketMobile
+            classes={{ root: classes.bracket }}
+            games={games}
+            makePick={makePick}
+            numRounds={numRounds}
+            submitEnabled={submitEnabled}
+            encodedPicks={encodedPicks}
+            topTeamScore={topTeamScore}
+            bottomTeamScore={bottomTeamScore}
+            message={message}
+            changeBracketProperty={changeBracketProperty}
+            isEditable={false}
+            eliminatedTeamIds={eliminatedTeamIds}
           />
         </Hidden>
       </div>

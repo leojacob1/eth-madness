@@ -52,7 +52,7 @@ export const getContractInstance = async (accountsNeeded) => {
   const signer = provider.getSigner();
   contractInstance = contractInstance.connect(signer);
 
-  return { networkId, contractInstance, contractAddress: deployedNetwork.address, provider };
+  return { networkId, contractInstance, "0x3f556287834294b58a162c522acbc52cf872ad97": deployedNetwork.address, provider };
 }
 
 export const getProviderAndAccounts = async () => {
@@ -197,38 +197,6 @@ function* claimTopEntry(action) {
   });
 }
 
-function* submitBracket(action) {
-  try {
-    const { contractInstance, provider, accounts } = yield call(getProviderAndAccounts);
-    const fromAddress = accounts[0];
-
-    const payload = action.payload;
-    const picks = convertEncodedPicksToByteArray(payload.encodedPicks);
-    const scoreA = BigNumber.from(payload.topTeamScore).toHexString();
-    const scoreB = BigNumber.from(payload.bottomTeamScore).toHexString();
-    const message = payload.message || '';
-
-    console.log(picks, scoreA, scoreB, message, fromAddress);
-
-    contractInstance.submitEntry(picks, scoreA, scoreB, message, {
-      from: fromAddress
-    })
-      .then((submissionResult) => {
-        console.log('YESSIR', submissionResult)
-
-        const entryIndex = submissionResult.events.EntrySubmitted.returnValues.entryIndex;
-        Actions.picksSubmittedSuccessfully(submissionResult.transactionHash, entryIndex);
-
-        console.log('here2')
-      })
-
-  } catch (error) {
-    console.error(error);
-    yield put(Actions.picksSubmissionFailed(error.message));
-    console.log("ERRRRRRR")
-  }
-}
-
 const byteArrayToHex = (byteArray, add0x) => {
   const result = byteArray.map(b => {
     const byte = b.toString(16);
@@ -294,7 +262,6 @@ function* mySaga() {
   yield all([
     loadContractInfo(),
     takeLatest(ActionTypes.ADVANCE_CONTEST_STATE, advanceContestState),
-    takeLatest(ActionTypes.SUBMIT_PICKS_TO_NETWORK, submitBracket),
     takeLeading(ActionTypes.LOAD_ENTRIES, loadEntries),
     takeLeading(ActionTypes.SUBMIT_ORACLE_VOTE, submitOracleVote),
     takeLatest(ActionTypes.ADD_ORACLE, addOracle),

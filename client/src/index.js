@@ -4,14 +4,22 @@ import { Provider } from 'react-redux'
 // import { AppContainer } from 'react-hot-loader';
 import configureStore, { history } from './store/configureStore';
 import App from './components/App'
+import SubmitPicksStore from './store/submitPicksStore';
+import { SubmitPicksContext, UserContext } from './store/context';
+import ethersProps, { ContractContext } from './Ethers';
 
 const store = configureStore();
 const rootEl = document.getElementById('root');
 
+
 const doRender = Component => {
   render(
     <Provider store={store}>
-      <Component history={history} />
+      <ContractContext.Provider value={ethersProps}>
+        <SubmitPicksContext.Provider value={new SubmitPicksStore()}>
+          <Component history={history} />
+        </SubmitPicksContext.Provider>
+      </ContractContext.Provider>
     </Provider>,
     rootEl
   );

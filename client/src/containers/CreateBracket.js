@@ -25,7 +25,6 @@ const mapDispatchToProps = dispatch => ({
   makePick: (gameId, teamId, slotId) => dispatch(Actions.pickGame(gameId, teamId, slotId)),
   makeRandomPicks: () => dispatch(Actions.makeRandomPicks()),
   clearPicks: () => dispatch(Actions.clearPicks()),
-  submitPicks: (encodedPicks, topTeamScore, bottomTeamScore, message) => dispatch(Actions.submitPicksToNetwork(encodedPicks, topTeamScore, bottomTeamScore, message)),
   perfectPicks: () => dispatch(Actions.perfectPicks()),
   topSeedPicks: () => dispatch(Actions.topSeedPicks()),
   changeBracketProperty: (propertyName, value) => dispatch(Actions.changeBracketProperty(propertyName, value))
