@@ -9,6 +9,7 @@ import { compose } from 'recompose';
 import { getProviderAndAccounts } from '../sagas';
 import { utils, BigNumber, ethers } from 'ethers';
 import { convertEncodedPicksToByteArray } from '../utils/converters';
+import { delay } from 'lodash';
 
 const styles = theme => ({
   root: {
@@ -108,19 +109,17 @@ const FinalFour = observer((props) => {
     const scoreB = BigNumber.from(bottomTeamScore).toHexString();
     const bracketName = bracketName || '';
 
-    console.log('submitBracket', picks, scoreA, scoreB, bracketName, fromAddress);
-
+    submitPicksStore.submitPicks();
     ethersProps.ethMadnessContract.submitEntry(picks, scoreA, scoreB, bracketName, {
       from: fromAddress
     })
-      .then(() => {
-        console.log('hell ya')
+      .then((txn) => {
+        console.log('hell ya', txn)
+        submitPicksStore.setPicksSuccess(null, 35);
       })
       .catch(() => {
-        submitPicksStore.setPicksFailure('Fuck');
+        submitPicksStore.setPicksFailure('Could not access network');
       })
-    submitPicksStore.submitPicks();
-    console.log('encoded picks', encodedPicks);
   }
 
   const getEditableFinalsComponent = () => {
