@@ -6,6 +6,8 @@ import "../EthMadness.sol";
 
 interface CheatCodes {
     function prank(address) external;
+
+    function startPrank(address) external;
 }
 
 contract ContractTest is DSTest {
@@ -18,11 +20,12 @@ contract ContractTest is DSTest {
         1555484399
     ];
     string encodedPicks =
-        "00100110101010010110010110010110011001011001011010100110101010100110101001010101011001011001011001100110100110011010100110100110";
+        "00101001101001100101010101101010101001100110100110101001100101010101011001011010010101101001010101010110101001011001010110011001";
     uint64 scoreA = 0x5f;
     uint64 scoreB = 0x44;
     string bracketName = "reboot Pizza Investment Account";
     address fromAddress = 0x9bEF1f52763852A339471f298c6780e158E43A68;
+    address fromAddress2 = 0xa02AE450eC74cbDf331F94f1589020a48B6db719;
 
     function substring(
         string memory str,
@@ -72,9 +75,6 @@ contract ContractTest is DSTest {
             //     i / 8
             // );
         }
-
-        emit log_bytes(result);
-
         return bytes16(result);
     }
 
@@ -129,10 +129,101 @@ contract ContractTest is DSTest {
     }
 
     function testExample() public {
-        cheats.prank(fromAddress);
-        emit log(encodedPicks);
-        // bytes16 picksBytes16 = stringToBytes16(encodedPicks);
-        // emit log_bytes32(bytes32(picksBytes16));
+        ethMadness.deleteLeoEntry();
+        cheats.startPrank(fromAddress);
+        ethMadness.submitEntry(
+            convertEncodedPicksToByteArray(encodedPicks),
+            scoreA,
+            scoreB,
+            bracketName
+        );
+        // entry has been set in entries and given the proper entryIndex
+        (uint48 entryIndex, uint256 entryCompressed) = ethMadness.entries(
+            fromAddress
+        );
+        assertEq(entryIndex, 0);
+        assertGt(entryCompressed, 0);
+        ethMadness.deleteLeoEntry();
+
+        (, uint256 entryCompressed2) = ethMadness.entries(fromAddress);
+        assertEq(entryCompressed2, 0);
+        cheats.startPrank(fromAddress2);
+        ethMadness.submitEntry(
+            convertEncodedPicksToByteArray(encodedPicks),
+            scoreA,
+            scoreB,
+            bracketName
+        );
+        (uint48 entryIndex3, uint256 entryCompressed3) = ethMadness.entries(
+            fromAddress2
+        );
+        assertEq(entryIndex3, 1);
+        assertGt(entryCompressed3, 0);
+    }
+
+    function testGetDependentGames() public {
+        ethMadness.setGameResult(32, 0);
+        ethMadness.setGameResult(0, 0);
+        uint8[6] memory dependentGameIds = [63, 63, 63, 63, 63, 63];
+        dependentGameIds[ethMadness.getRoundForGame(uint8(32))] = 32;
+        uint8 lowestDependentGame = 32;
+        while (lowestDependentGame >= uint8(32)) {
+            lowestDependentGame = ethMadness.getDependentGame(
+                int8(lowestDependentGame)
+            );
+            dependentGameIds[
+                ethMadness.getRoundForGame(uint8(lowestDependentGame))
+            ] = lowestDependentGame;
+        }
+        assertEq(dependentGameIds[0], 0);
+        assertEq(dependentGameIds[1], 32);
+
+        // ethMadness.setGameResult(49, 0);
+        // ethMadness.setGameResult(34, 0);
+        // ethMadness.setGameResult(4, 1);
+        // newDependentGames = ethMadness.getDependentGameRecursive(
+        //     dependentGames,
+        //     49
+        // );
+        // assertEq(newDependentGames[0], 49);
+        // assertEq(newDependentGames[1], 34);
+        // assertEq(newDependentGames[2], 4);
+    }
+
+    function testValidatePick() public {
+        cheats.startPrank(fromAddress);
+        ethMadness.submitEntry(
+            convertEncodedPicksToByteArray(encodedPicks),
+            scoreA,
+            scoreB,
+            bracketName
+        );
+        ethMadness.setGameResult(32, 0);
+        ethMadness.setGameResult(0, 1);
+        cheats.startPrank(fromAddress);
+        bool isPickRight = ethMadness.validateGamePick(32);
+        if (isPickRight == true) {
+            emit log("yes");
+        } else {
+            emit log("no");
+        }
+        // assertTrue(isPickRight, true);
+    }
+
+    // function testMintToken() public {
+    //     ethMadness.deleteLeoEntry();
+    //     cheats.startPrank(fromAddress);
+    //     ethMadness.submitEntry(
+    //         convertEncodedPicksToByteArray(encodedPicks),
+    //         scoreA,
+    //         scoreB,
+    //         bracketName
+    //     );
+    // }
+
+    function testShouldBreak() public {
+        ethMadness.deleteLeoEntry();
+        cheats.startPrank(fromAddress);
 
         ethMadness.submitEntry(
             convertEncodedPicksToByteArray(encodedPicks),
@@ -140,10 +231,13 @@ contract ContractTest is DSTest {
             scoreB,
             bracketName
         );
-    }
+        cheats.startPrank(fromAddress);
 
-    function testConvert() public {
-        bytes16 picks = 0x262965166516262a6a55651666192926;
-        emit log_named_uint("PICK", uint8(picks[0]));
+        ethMadness.submitEntry(
+            convertEncodedPicksToByteArray(encodedPicks),
+            scoreA,
+            scoreB,
+            bracketName
+        );
     }
 }

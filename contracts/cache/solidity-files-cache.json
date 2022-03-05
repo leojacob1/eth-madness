@@ -179,8 +179,8 @@
       }
     },
     "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/EthMadness.sol": {
-      "lastModificationDate": 1646371015392,
-      "contentHash": "5a17275fc134ba9cac8b556483d1626f",
+      "lastModificationDate": 1646468520051,
+      "contentHash": "1f90b67f7e206856e0248c965f826f0b",
       "sourceName": "src/EthMadness.sol",
       "solcConfig": {
         "settings": {
@@ -205,6 +205,7 @@
         }
       },
       "imports": [
+        "lib/ds-test/src/test.sol",
         "lib/openzeppelin-contracts/contracts/access/Ownable.sol",
         "lib/openzeppelin-contracts/contracts/utils/Context.sol"
       ],
@@ -391,8 +392,8 @@
       }
     },
     "/Users/leojacoby/Hacking/crypto/eth-madness/contracts/src/test/Contract.t.sol": {
-      "lastModificationDate": 1646371015392,
-      "contentHash": "baecb608565b9a2bfb06071716755e01",
+      "lastModificationDate": 1646468539214,
+      "contentHash": "43c9d43c9fae9ecf30a0e53f6dffb6b3",
       "sourceName": "src/test/Contract.t.sol",
       "solcConfig": {
         "settings": {

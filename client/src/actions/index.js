@@ -47,7 +47,6 @@ export const changeSearch = (searchValue) => ({ type: ActionTypes.CHANGE_SEARCH,
 
 export const picksSubmissionFailed = (reason) => ({ type: ActionTypes.PICKS_SUBMISSION_FAILED, reason });
 export const picksSubmittedSuccessfully = (transactionHash, entryIndex) => {
-  console.log('Im here')
   return ({ type: ActionTypes.PICKS_SUBMITTED_SUCCESSFULLY, transactionHash, entryIndex })
 };
 

@@ -104,7 +104,7 @@ const SubmitPicksDialog = observer((props) => {
             <Button onClick={handleClose} className={classes.viewBracketButton} fullWidth variant="contained" >Close</Button>
           </div>);
       case 'succeeded':
-        const bracketLink = `${window.origin}/bracket/${submitPicksStore.submissionStatus.bracketId}`;
+        const bracketLink = `${window.origin}/bracket/${submitPicksStore.submissionStatus.submitter}`;
         const tweetContent = `Check out my March Madness bracket - stored in a smart contract via ethmadness.com built by @nodesmith %23ethmadness. ${bracketLink}`
         const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetContent}`;
         return (
@@ -122,7 +122,7 @@ const SubmitPicksDialog = observer((props) => {
               </DialogContentText>
             </div>
             <NavLink className={classes.viewBracketButton}
-              to={{ pathname: `/bracket/${submitPicksStore.submissionStatus.bracketId}`, search: props.location.search }}>
+              to={{ pathname: `/bracket/${submitPicksStore.submissionStatus.submitter}`, search: props.location.search }}>
               <Button onClick={handleClose} fullWidth variant="contained" >View Bracket</Button>
             </NavLink>
           </div>);

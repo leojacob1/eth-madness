@@ -74,14 +74,14 @@ const styles = theme => ({
 const FinalFour = observer((props) => {
   const submitPicksStore = useContext(SubmitPicksContext);
   const [txnHash, setTxnHash] = useState();
-  const [entryIndex, setEntryIndex] = useState();
+  const [isTxnComplete, setTxnComplete] = useState(false);
 
   useEffect(() => {
-    if (txnHash && entryIndex) {
-      console.log('Ladies and gentlemen, we got em', txnHash, entryIndex);
-      submitPicksStore.setPicksSuccess(txnHash, entryIndex);
+    if (txnHash && isTxnComplete) {
+      console.log('Ladies and gentlemen, we got em', txnHash);
+      submitPicksStore.setPicksSuccess(txnHash);
     }
-  }, [txnHash, entryIndex])
+  }, [txnHash, isTxnComplete])
   const createGame = (game, makePick, roundNumber) => {
     const { isEditable, eliminatedTeamIds } = props;
 
@@ -108,9 +108,9 @@ const FinalFour = observer((props) => {
     ethersProps.ethMadnessContract.on(filter, (submitter, entryCompressed, respEntryIndex) => {
       // The to will always be "address"
       console.log('submitter', submitter, entryCompressed, respEntryIndex);
-      setEntryIndex(respEntryIndex);
+      setTxnComplete(true);
     });
-
+    console.log('encoded picks', encodedPicks);
     const picks = convertEncodedPicksToByteArray(encodedPicks);
     const scoreA = BigNumber.from(topTeamScore).toHexString();
     const scoreB = BigNumber.from(bottomTeamScore).toHexString();

@@ -239,6 +239,7 @@ function* loadEntries() {
       const picks = byteArrayToHex(picksBytes, true);
 
       const entryCompressed = byteArrayToHex(entryCompressedArray, true);
+      console.log('load entry saga');
       return {
         transactionHash: event.transactionHash,
         entrant: event.returnValues.submitter,

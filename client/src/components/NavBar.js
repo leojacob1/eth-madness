@@ -7,6 +7,9 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { NavLink } from 'react-router-dom';
 import ConnectButton from './ConnectButton';
+import { compose } from 'recompose';
+import { withEthers } from '../Ethers';
+import { Button } from '@material-ui/core';
 
 const HEADER_HEIGHT = 60;
 
@@ -69,6 +72,9 @@ function SimpleAppBar(props) {
             <Typography className={classes.largerFont} variant="overline">Create Bracket</Typography>
           </NavLink>
           <ConnectButton />
+          <Button onClick={() => {
+            props.ethersProps.ethMadnessContract.deleteLeoEntry();
+          }}>Delete Leo&apos;s bracket</Button>
         </Toolbar>
       </AppBar>
     </div>
@@ -79,4 +85,7 @@ SimpleAppBar.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(SimpleAppBar);
+export default compose(
+  withEthers,
+  withStyles(styles)
+)(SimpleAppBar);

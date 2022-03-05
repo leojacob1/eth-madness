@@ -1,13 +1,13 @@
 pragma solidity ^0.8.10;
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
+import "ds-test/test.sol";
 
-contract EthMadness is Ownable {
+contract EthMadness is Ownable, DSTest {
     // Represents the submission to the contest.
-    struct Entrant {
-        // The user who submitted this entry
-        address submitter;
+    struct Entry {
         // The "index" of this entry. Used to break ties incase two submissions are the same. (earlier submission wins)
         uint48 entryIndex;
+        uint256 entryCompressed;
     }
 
     // Represents the results of the contest.
@@ -42,8 +42,8 @@ contract EthMadness is Ownable {
     // The number of entries which have been received.
     uint48 entryCount = 0;
 
-    // Map of the encoded entry to the user who crreated it.
-    mapping(uint256 => Entrant) public entries;
+    // Map of the submitter address to encoded entry with index.
+    mapping(address => Entry) public entries;
 
     // The times where we're allowed to transition the contract's state
     // mapping(uint256 => uint256) public transitionTimes;
@@ -107,65 +107,90 @@ contract EthMadness is Ownable {
         currentState = nextState;
     }
 
-    uint256[6] roundFirstGameIds = [62, 60, 56, 48, 32, 0];
+    int8[6] roundFirstGameIds = [
+        int8(62),
+        int8(60),
+        int8(56),
+        int8(48),
+        int8(32),
+        int8(0)
+    ];
 
-    function getDependentGameRecursive(
-        uint256[] dependentGameIds,
-        uint256 gameId
-    ) private view returns (uint256[]) {
-        for (uint256 i = 0; i < 6; i++) {
+    function getDependentGame(int8 gameId) public returns (uint8) {
+        for (uint8 i = 0; i < 5; i++) {
             if ((gameId - roundFirstGameIds[i]) >= 0) {
-                uint256 potentialGameId1 = roundFirstGameIds[i + 1] +
-                    (gameId - gameNum) *
-                    2;
-                uint256 potentialGameId2 = roundFirstGameIds[i + 1] +
-                    (gameId - gameNum) *
-                    2 +
-                    1;
-                if (gameResults[gameId] == 1) {
-                    dependentGameIds.push(potentialGameId2);
-                    dependentGameIds = getDependentGame(
-                        dependentGameIds,
-                        potentialGameId2
-                    );
+                uint8 potentialGameId1 = uint8(
+                    roundFirstGameIds[i + 1] +
+                        (gameId - roundFirstGameIds[i]) *
+                        2
+                );
+                uint8 potentialGameId2 = uint8(
+                    roundFirstGameIds[i + 1] +
+                        (gameId - roundFirstGameIds[i]) *
+                        2 +
+                        1
+                );
+                if (gameResults[uint8(gameId)] == 1) {
+                    return potentialGameId2;
                 } else {
-                    dependentGameIds.push(potentialGameId1);
-                    dependentGameIds = getDependentGame(
-                        dependentGameIds,
-                        potentialGameId1
-                    );
+                    return potentialGameId1;
                 }
                 break;
             }
         }
-        return dependentGameIds;
     }
 
-    function validateGame(uint256 gameIdToValidate, uint256 entryCompressed)
-        private
-        view
-        returns (bool)
-    {
-        uint256[] dependentGameIds;
-        dependentGameIds = getDependentGameRecursive(
-            dependentGameIds,
-            gameIdToValidate
-        );
+    function validateGamePick(uint8 gameIdToValidate) public returns (bool) {
+        uint8[6] memory dependentGameIds = [63, 63, 63, 63, 63, 63];
+        dependentGameIds[getRoundForGame(gameIdToValidate)] = gameIdToValidate;
+        uint8 lowestDependentGame = gameIdToValidate;
+        while (lowestDependentGame >= uint8(32)) {
+            lowestDependentGame = getDependentGame(int8(lowestDependentGame));
+            dependentGameIds[
+                getRoundForGame(lowestDependentGame)
+            ] = lowestDependentGame;
+        }
         for (uint256 i = 0; i < dependentGameIds.length; i++) {
-            uint256 gameId = dependentGameIds[i];
+            uint8 gameId = dependentGameIds[i];
+            if (gameId == 63) {
+                break;
+            }
+            uint256 entryCompressed = entries[msg.sender].entryCompressed;
+            bytes16 picks = bytes16(
+                uint128((entryCompressed & uint256((2**128) - 1)))
+            );
+            uint8 userPick = extractResult(picks, gameId) - 1;
+            uint8 correctPick = gameResults[gameId];
+            if (userPick != correctPick) {
+                return false;
+            }
             // TODO: get picks back from entryCompressed
             // Look up pick by gameId and compare to actual results
             // If all games are correct in dependentGameIds --> true
         }
+        return true;
     }
 
-    function mintTokenForGame(uint256 entryCompressed) public {
-        require(entries[entryCompressed].submitter == msg.sender);
+    function mintTokenForGame(uint8 gameId) public {
+        // make sure user submitted a bracket
         require(
-            validateGamePick(gameId, entryCompressed) == true,
-            "This pick was not correct"
+            entries[msg.sender].entryIndex >= 0,
+            "User has not submitted a bracket"
         );
+        require(gameId >= 0, "Not a valid game");
+        require(gameId <= 62, "Not a valid game");
+        require(validateGamePick(gameId) == true, "This pick was not correct");
         // mint token
+    }
+
+    // for testing
+    function setGameResult(uint256 gameId, uint8 result) external {
+        gameResults[gameId] = result;
+    }
+
+    // for testing
+    function deleteLeoEntry() external {
+        delete entries[0x9bEF1f52763852A339471f298c6780e158E43A68];
     }
 
     // Submits a new entry to the tournament
@@ -187,8 +212,8 @@ contract EthMadness is Ownable {
         uint256 entryCompressed = scoreAShifted | scoreBShifted | picksAsNumber;
 
         require(
-            entries[entryCompressed].submitter == address(0),
-            "This exact bracket & score has already been submitted"
+            entries[msg.sender].entryCompressed == 0,
+            "This user has submitted an entry already"
         );
 
         // Emit the event that this entry was received and save the entry
@@ -198,10 +223,20 @@ contract EthMadness is Ownable {
             entryCount,
             bracketName
         );
-        Entrant memory entrant = Entrant(msg.sender, entryCount);
-        entries[entryCompressed] = entrant;
+        Entry memory entry = Entry(entryCount, entryCompressed);
+        entries[msg.sender] = entry;
         entryCount++;
         return entryCount;
+    }
+
+    // Returns either 0 if there is no possible winner, 1 if team B is chosen, or 2 if team A is chosen
+    function extractResult(bytes16 a, uint8 n) private pure returns (uint8) {
+        uint128 mask = uint128(0x00000000000000000000000000000003) *
+            uint128(2)**(n * 2);
+        uint128 masked = uint128(a) & mask;
+
+        // Shift back to get either 0, 1 or 2
+        return uint8(masked / (uint128(2)**(n * 2)));
     }
 
     // Adds an allowerd oracle who will vote on the results of the contest. Only the contract owner can do this
@@ -312,7 +347,7 @@ contract EthMadness is Ownable {
         return bytes1(max); // 0 - 1, since data type is unsigned, this results in all 1s.
     }
 
-    function getRoundForGame(uint8 gameId) private pure returns (uint8) {
+    function getRoundForGame(uint8 gameId) public pure returns (uint8) {
         if (gameId < 32) {
             return 0;
         } else if (gameId < 48) {

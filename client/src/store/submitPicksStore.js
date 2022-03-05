@@ -47,7 +47,7 @@ class SubmitPicksStore {
     this.submissionStatus = {
       state: 'succeeded',
       transactionHash: txnHash,
-      bracketId: entryIndex
+      submitter: this.userAddress
     }
   }
 
