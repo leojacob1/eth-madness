@@ -13,7 +13,7 @@ const routes = (
   <div>
     <Switch>
       <Route exact path="/" component={HomePage} />
-      <Route path="/bracket/:entryIndex" component={ShowBracket} />
+      <Route path="/bracket/:submitterAddress" component={ShowBracket} />
       <Route path="/leaders" component={LeaderboardContainer} />
       <Route path="/admin" component={AdminContainer} />
       <Route component={CreateBracket} />

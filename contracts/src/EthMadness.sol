@@ -107,16 +107,15 @@ contract EthMadness is Ownable, DSTest {
         currentState = nextState;
     }
 
-    int8[6] roundFirstGameIds = [
-        int8(62),
-        int8(60),
-        int8(56),
-        int8(48),
-        int8(32),
-        int8(0)
-    ];
-
-    function getDependentGame(int8 gameId) public returns (uint8) {
+    function getDependentGame(int8 gameId) public view returns (uint8) {
+        int8[6] memory roundFirstGameIds = [
+            int8(62),
+            int8(60),
+            int8(56),
+            int8(48),
+            int8(32),
+            int8(0)
+        ];
         for (uint8 i = 0; i < 5; i++) {
             if ((gameId - roundFirstGameIds[i]) >= 0) {
                 uint8 potentialGameId1 = uint8(
@@ -140,7 +139,11 @@ contract EthMadness is Ownable, DSTest {
         }
     }
 
-    function validateGamePick(uint8 gameIdToValidate) public returns (bool) {
+    function validateGamePick(uint8 gameIdToValidate)
+        public
+        view
+        returns (bool)
+    {
         uint8[6] memory dependentGameIds = [63, 63, 63, 63, 63, 63];
         dependentGameIds[getRoundForGame(gameIdToValidate)] = gameIdToValidate;
         uint8 lowestDependentGame = gameIdToValidate;
@@ -152,21 +155,26 @@ contract EthMadness is Ownable, DSTest {
         }
         for (uint256 i = 0; i < dependentGameIds.length; i++) {
             uint8 gameId = dependentGameIds[i];
+
             if (gameId == 63) {
                 break;
             }
             uint256 entryCompressed = entries[msg.sender].entryCompressed;
+
             bytes16 picks = bytes16(
                 uint128((entryCompressed & uint256((2**128) - 1)))
             );
-            uint8 userPick = extractResult(picks, gameId) - 1;
-            uint8 correctPick = gameResults[gameId];
-            if (userPick != correctPick) {
+
+            uint8 userPick = extractResult(picks, gameId);
+
+            if (userPick == 0) {
                 return false;
             }
-            // TODO: get picks back from entryCompressed
-            // Look up pick by gameId and compare to actual results
-            // If all games are correct in dependentGameIds --> true
+            uint8 correctPick = gameResults[gameId];
+
+            if (userPick - 1 != correctPick) {
+                return false;
+            }
         }
         return true;
     }
@@ -180,7 +188,7 @@ contract EthMadness is Ownable, DSTest {
         require(gameId >= 0, "Not a valid game");
         require(gameId <= 62, "Not a valid game");
         require(validateGamePick(gameId) == true, "This pick was not correct");
-        // mint token
+        // TODO: mint token
     }
 
     // for testing
@@ -203,6 +211,10 @@ contract EthMadness is Ownable, DSTest {
         require(
             currentState == ContestState.OPEN_FOR_ENTRIES,
             "Must be in the open for entries state"
+        );
+        require(
+            arePicksOrResultsValid(picks),
+            "The supplied picks are not valid"
         );
 
         // Do some work to encode the picks and scores into a single uint256 which becomes a key
@@ -239,6 +251,33 @@ contract EthMadness is Ownable, DSTest {
         return uint8(masked / (uint128(2)**(n * 2)));
     }
 
+    // function extractResult(bytes16 a, uint8 n) public returns (uint8) {
+    //     // get which group of 8 games n is in (0-7), (8-15), ..., (56-63)
+    //     // bytes are stored in descending game order, thus we use 15 - x
+    //     uint8 bytesGroup = 15 - ((n - (n % 4)) / 4);
+    //     uint8 gameByte = uint8(a[bytesGroup]);
+    //     emit log_named_uint("bytegroup", bytesGroup);
+    //     emit log_named_uint("gamebyte", gameByte);
+    //     uint8 gameIndexInByte = 3-(n%4);
+    //     uint8
+    // }
+
+    function arePicksOrResultsValid(bytes16 picksOrResults)
+        public
+        pure
+        returns (bool)
+    {
+        // Go through and make sure that this entry has 1 pick for each game
+        for (uint8 gameId = 0; gameId < 63; gameId++) {
+            uint128 currentPick = extractResult(picksOrResults, gameId);
+            if (currentPick != 2 && currentPick != 1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     // Adds an allowerd oracle who will vote on the results of the contest. Only the contract owner can do this
     // and it can only be done while the tournament is still open for entries
     function addOracle(address oracle) public onlyOwner {
@@ -265,7 +304,7 @@ contract EthMadness is Ownable, DSTest {
             "Must be in waiting for oracles state"
         );
         require(oracles[oracleIndex] == msg.sender, "Wrong oracle index");
-        // require(arePicksOrResultsValid(winners), "Results are not valid");
+        require(arePicksOrResultsValid(winners), "Results are not valid");
         oracleVotes[msg.sender] = Result(winners, scoreA, scoreB, true);
     }
 

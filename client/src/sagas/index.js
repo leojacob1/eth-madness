@@ -8,6 +8,7 @@ import * as ContestState from '../utils/ContestState';
 import { convertEncodedPicksToByteArray } from '../utils/converters';
 import { getWeb3WithAccounts } from '../utils/getWeb3';
 import { utils, BigNumber, ethers } from 'ethers';
+import ethMadnessContractAddress from '../Ethers/ethMadnessContractAddress';
 
 const getWeb3ForNetworkId = async (networkId, accountsNeeded) => {
   if (accountsNeeded) {
@@ -43,53 +44,35 @@ const getWeb3ForNetworkId = async (networkId, accountsNeeded) => {
 }
 
 export const getContractInstance = async (accountsNeeded) => {
-  const parsedQs = queryString.parse(window.location.search);
-  const networkId = parsedQs['networkId'] || '1';
-  const deployedNetwork = EthMadness.networks[networkId];
-
   const provider = new ethers.providers.Web3Provider(window.ethereum);
-  let contractInstance = new ethers.Contract("0x3f556287834294b58a162c522acbc52cf872ad97", EthMadness.abi, provider);
+  let ethMadnessContract = new ethers.Contract(ethMadnessContractAddress, EthMadness.abi, provider);
   const signer = provider.getSigner();
-  contractInstance = contractInstance.connect(signer);
+  ethMadnessContract = ethMadnessContract.connect(signer);
+  const ethersProps = { ethMadnessContract, provider };
 
-  return { networkId, contractInstance, "0x3f556287834294b58a162c522acbc52cf872ad97": deployedNetwork.address, provider };
-}
-
-export const getProviderAndAccounts = async () => {
-  const { networkId, contractInstance, contractAddress, provider } = await getContractInstance(true);
-  const accounts = await window.ethereum.request({
-    method: "eth_requestAccounts",
-  });
-  console.log('ACCOUNTS', accounts)
-  return { accounts, networkId, contractInstance, contractAddress, provider };
+  return { ethMadnessContract, provider };
 }
 
 function* loadContractInfo(includeAdminStuff) {
   try {
-    const { contractInstance, networkId, contractAddress } = yield call(getContractInstance, false);
+    const { ethMadnessContract } = yield call(getContractInstance, false);
 
-    const currentState = yield call(contractInstance.methods.currentState().call);
-    const entryCount = yield call(contractInstance.methods.getEntryCount().call);
+    const currentState = yield call(ethMadnessContract.currentState());
+    const entryCount = yield call(ethMadnessContract.getEntryCount());
 
     if (includeAdminStuff) {
-      const oracleCount = yield call(contractInstance.methods.getOracleCount().call);
+      const oracleCount = yield call(ethMadnessContract.getOracleCount());
       const oracles = [];
       for (let i = 0; i < oracleCount; i++) {
-        const oracleAddress = yield call(contractInstance.methods.oracles(i).call);
-        const oracleVote = yield call(contractInstance.methods.oracleVotes(oracleAddress).call);
+        const oracleAddress = yield call(ethMadnessContract.oracles(i));
+        const oracleVote = yield call(ethMadnessContract.oracleVotes(oracleAddress));
         oracles.push({
           oracleAddress,
           oracleVote
         });
       }
 
-      const transitionTimesArray = yield call(contractInstance.methods.getTransitionTimes().call);
-
-      const first = yield call(contractInstance.methods.topThree(0).call);
-      const second = yield call(contractInstance.methods.topThree(1).call);
-      const third = yield call(contractInstance.methods.topThree(2).call);
-      const prizeAmount = yield call(contractInstance.methods.prizeAmount().call);
-      const prizeERC20TokenAddress = yield call(contractInstance.methods.prizeERC20TokenAddress().call);
+      const transitionTimesArray = yield call(ethMadnessContract.getTransitionTimes());
       const transitionTimes = {
         [ContestState.TOURNAMENT_IN_PROGRESS]: parseInt(transitionTimesArray[0]) * 1000,
         [ContestState.WAITING_FOR_ORACLES]: parseInt(transitionTimesArray[1]) * 1000,
@@ -99,16 +82,9 @@ function* loadContractInfo(includeAdminStuff) {
 
       const metadata = {
         currentState,
-        networkId,
-        contractAddress,
         entryCount,
         oracles,
         transitionTimes,
-        first,
-        second,
-        third,
-        prizeAmount,
-        prizeERC20TokenAddress
       }
 
       yield put(Actions.setContractMetadata(metadata, true));
@@ -116,8 +92,6 @@ function* loadContractInfo(includeAdminStuff) {
     } else {
       const metadata = {
         currentState,
-        networkId,
-        contractAddress,
         entryCount
       };
 
@@ -132,17 +106,17 @@ function* loadContractInfo(includeAdminStuff) {
 
 function* submitOracleVote(action) {
   const { results, scoreA, scoreB } = action;
-  const { contractInstance, accounts } = yield call(getProviderAndAccounts);
+  const { contractInstance, accounts } = action.ethersProps;
   const fromAddress = accounts[0];
-  yield call(contractInstance.methods.submitOracleVote(action.oracleIndex, results, scoreA, scoreB).send, {
+  yield call(contractInstance.submitOracleVote(action.oracleIndex, results, scoreA, scoreB), {
     from: fromAddress
   });
 }
 
 function* addOracle(action) {
-  const { contractInstance, accounts } = yield call(getProviderAndAccounts);
+  const { contractInstance, accounts } = action.ethersProps;
   const fromAddress = accounts[0];
-  yield call(contractInstance.methods.addOracle(action.oracleAddress).send, {
+  yield call(contractInstance.addOracle(action.oracleAddress), {
     from: fromAddress
   });
 }
@@ -150,21 +124,21 @@ function* addOracle(action) {
 function* advanceContestState(action) {
   try {
     console.log('Advancing state');
-    const { contractInstance, accounts } = yield call(getProviderAndAccounts);
+    const { contractInstance, accounts } = action.ethersProps;
     const fromAddress = accounts[0];
     switch (action.nextState) {
       case ContestState.TOURNAMENT_IN_PROGRESS:
-        yield call(contractInstance.methods.markTournamentInProgress().send, {
+        yield call(contractInstance.markTournamentInProgress(), {
           from: fromAddress
         });
         break;
       case ContestState.WAITING_FOR_ORACLES:
-        yield call(contractInstance.methods.markTournamentFinished().send, {
+        yield call(contractInstance.markTournamentFinished(), {
           from: fromAddress
         });
         break;
       case ContestState.COMPLETED:
-        yield call(contractInstance.methods.closeContestAndPayWinners().send, {
+        yield call(contractInstance.closeContestAndPayWinners(), {
           from: fromAddress
         });
         break;
@@ -172,7 +146,7 @@ function* advanceContestState(action) {
         throw new Error('Unsupported next state');
     }
 
-    const currentState = yield call(contractInstance.methods.currentState().call);
+    const currentState = yield call(contractInstance.currentState());
     yield put(Actions.setContractMetadata({ currentState }));
 
   } catch (e) {
@@ -182,17 +156,17 @@ function* advanceContestState(action) {
 
 function* closeOracleVoting(action) {
   const { results, scoreA, scoreB } = action;
-  const { contractInstance, accounts } = yield call(getProviderAndAccounts);
+  const { contractInstance, accounts } = action.ethersProps;
   const fromAddress = accounts[0];
-  yield call(contractInstance.methods.closeOracleVoting(results, scoreA, scoreB).send, {
+  yield call(contractInstance.closeOracleVoting(results, scoreA, scoreB), {
     from: fromAddress
   });
 }
 
 function* claimTopEntry(action) {
-  const { contractInstance, accounts } = yield call(getProviderAndAccounts);
+  const { contractInstance, accounts } = action.ethersProps;
   const fromAddress = accounts[0];
-  yield call(contractInstance.methods.claimTopEntry(action.entryCompressed).send, {
+  yield call(contractInstance.claimTopEntry(action.entryCompressed), {
     from: fromAddress
   });
 }
@@ -206,20 +180,19 @@ const byteArrayToHex = (byteArray, add0x) => {
   return add0x ? ('0x' + result) : result;
 }
 
-function* loadEntries() {
+function* loadEntries(ethersProps) {
   try {
-    const { contractInstance, provider } = yield call(getContractInstance, false);
+    console.log('we in dis bitch')
+    const { ethMadnessContract } = yield call(getContractInstance, false);
     const events = yield call(() => new Promise((resolve, reject) => {
-      contractInstance.getPastEvents('EntrySubmitted', {
-        fromBlock: '0x70c3a0',
-        toBlock: 'latest'
-      }, (error, events) => {
-        if (error) {
-          reject(error);
-        } else {
+      const emptyFilter = ethMadnessContract.filters.EntrySubmitted(null, null);
+      ethMadnessContract.queryFilter(null, null, null)
+        .then((events) => {
           resolve(events);
-        }
-      });
+        })
+        .catch((err) => {
+          reject(err)
+        });
     }));
 
     const convertedEvents = events.map(event => {

@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ViewEntry from './ViewEntry';
+import { withEthers } from '../Ethers';
+import { SubmitPicksContext } from '../store/context';
 
 /**
  * Simple spinner, triggers a passed load action.
@@ -11,7 +13,7 @@ const LoadingContainer = (props) => {
   console.log('loading container')
   if (isLoading) {
     // Trigger the load action, this shouldn't trigger one if one is already in progress
-    loadAction();
+    loadAction(props.ethersProps);
     return (
       <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 32 }}>
         <CircularProgress />
@@ -28,4 +30,4 @@ LoadingContainer.propTypes = {
   realProps: PropTypes.object.isRequired,
 };
 
-export default (LoadingContainer);
+export default withEthers(LoadingContainer);

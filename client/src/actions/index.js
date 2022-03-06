@@ -41,7 +41,7 @@ export const addOracle = (oracleAddress) => ({ type: ActionTypes.ADD_ORACLE, ora
 export const claimTopEntry = (entryCompressed) => ({ type: ActionTypes.CLAIM_TOP_ENTRY, entryCompressed });
 export const closeOracleVoting = (results, scoreA, scoreB) => ({ type: ActionTypes.CLOSE_ORACLE_VOTING, results, scoreA, scoreB });
 
-export const loadEntries = () => ({ type: ActionTypes.LOAD_ENTRIES });
+export const loadEntries = (ethersProps) => ({ type: ActionTypes.LOAD_ENTRIES, ethersProps });
 export const setEntries = (entries) => ({ type: ActionTypes.SET_ENTRIES, entries });
 export const changeSearch = (searchValue) => ({ type: ActionTypes.CHANGE_SEARCH, searchValue });
 

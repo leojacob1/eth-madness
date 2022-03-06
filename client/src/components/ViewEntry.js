@@ -45,59 +45,58 @@ const styles = theme => ({
 /**
  * Shows a submitted and filled out bracket entry which is not editable.
  */
-class ViewEntry extends Component {
-  render = () => {
-    const { bracketName, transactionHash, games, classes, makePick, numRounds, submitEnabled,
-      encodedPicks, topTeamScore, bottomTeamScore, message, changeBracketProperty, eliminatedTeamIds, bracketScore, bracketId } = this.props;
-    return (
-      <div className={classes.root}>
-        <div className={classes.titleBar}>
-          <Typography className={classes.title} align="center" variant="h5">{bracketName}</Typography>
-          <div className={classes.subheader} >
-            <Typography className={classes.title} align="center" variant="h6"><span>Score: {bracketScore}</span></Typography>
-            <Typography className={classes.title} align="center" variant="h6"><span>
-              <a href={`https://etherscan.io/tx/${transactionHash}`} target="_blank" rel="noopener noreferrer">
-                View Tx
-              </a></span>
-            </Typography>
-          </div>
+const ViewEntry = (props) => {
+  console.log('view entry!', props.games);
+  const { bracketName, transactionHash, games, classes, makePick, numRounds, submitEnabled,
+    encodedPicks, topTeamScore, bottomTeamScore, message, changeBracketProperty, eliminatedTeamIds, bracketScore, bracketId } = props;
+  return (
+    <div className={classes.root}>
+      <div className={classes.titleBar}>
+        <Typography className={classes.title} align="center" variant="h5">{bracketName}</Typography>
+        <div className={classes.subheader} >
+          <Typography className={classes.title} align="center" variant="h6"><span>Score: {bracketScore}</span></Typography>
+          <Typography className={classes.title} align="center" variant="h6"><span>
+            <a href={`https://etherscan.io/tx/${transactionHash}`} target="_blank" rel="noopener noreferrer">
+              View Tx
+            </a></span>
+          </Typography>
         </div>
-        <Hidden smDown>
-          <Bracket
-            classes={{ root: classes.bracket }}
-            games={games}
-            makePick={makePick}
-            numRounds={numRounds}
-            submitEnabled={submitEnabled}
-            encodedPicks={encodedPicks}
-            topTeamScore={topTeamScore}
-            bottomTeamScore={bottomTeamScore}
-            message={message}
-            changeBracketProperty={changeBracketProperty}
-            isEditable={false}
-            eliminatedTeamIds={eliminatedTeamIds}
-            bracketId={bracketId}
-          />
-        </Hidden>
-        <Hidden mdUp>
-          <BracketMobile
-            classes={{ root: classes.bracket }}
-            games={games}
-            makePick={makePick}
-            numRounds={numRounds}
-            submitEnabled={submitEnabled}
-            encodedPicks={encodedPicks}
-            topTeamScore={topTeamScore}
-            bottomTeamScore={bottomTeamScore}
-            message={message}
-            changeBracketProperty={changeBracketProperty}
-            isEditable={false}
-            eliminatedTeamIds={eliminatedTeamIds}
-          />
-        </Hidden>
       </div>
-    );
-  }
+      <Hidden smDown>
+        <Bracket
+          classes={{ root: classes.bracket }}
+          games={games}
+          makePick={makePick}
+          numRounds={numRounds}
+          submitEnabled={submitEnabled}
+          encodedPicks={encodedPicks}
+          topTeamScore={topTeamScore}
+          bottomTeamScore={bottomTeamScore}
+          message={message}
+          changeBracketProperty={changeBracketProperty}
+          isEditable={false}
+          eliminatedTeamIds={eliminatedTeamIds}
+          bracketId={bracketId}
+        />
+      </Hidden>
+      <Hidden mdUp>
+        <BracketMobile
+          classes={{ root: classes.bracket }}
+          games={games}
+          makePick={makePick}
+          numRounds={numRounds}
+          submitEnabled={submitEnabled}
+          encodedPicks={encodedPicks}
+          topTeamScore={topTeamScore}
+          bottomTeamScore={bottomTeamScore}
+          message={message}
+          changeBracketProperty={changeBracketProperty}
+          isEditable={false}
+          eliminatedTeamIds={eliminatedTeamIds}
+        />
+      </Hidden>
+    </div>
+  );
 }
 
 ViewEntry.propTypes = {

@@ -20,7 +20,7 @@ contract ContractTest is DSTest {
         1555484399
     ];
     string encodedPicks =
-        "00101001101001100101010101101010101001100110100110101001100101010101011001011010010101101001010101010110101001011001010110011001";
+        "00011010010101010110010110010110101010010110010110011001010110011010011010011010101001011010100101101010011001100110100101010110";
     uint64 scoreA = 0x5f;
     uint64 scoreB = 0x44;
     string bracketName = "reboot Pizza Investment Account";
@@ -40,20 +40,6 @@ contract ContractTest is DSTest {
         return string(result);
     }
 
-    // function concat(
-    //     bytes memory b1,
-    //     bytes1 b2,
-    //     uint256 currentSize
-    // ) public returns (bytes memory) {
-    //     uint256 newSize = currentSize + 1;
-    //     bytes memory result = new bytes(1);
-    //     assembly {
-    //         mstore(add(result, 1), b1)
-    //         mstore(add(result, 1), b2)
-    //     }
-    //     return result;
-    // }
-
     function convertEncodedPicksToByteArray(string memory bitString)
         private
         returns (bytes16)
@@ -61,19 +47,11 @@ contract ContractTest is DSTest {
         require(bytes(bitString).length % 8 == 0, "Wrong size bit string");
 
         bytes memory result = new bytes(16);
-        // result = new bytes(0);
         for (uint8 i = 0; i < bytes(bitString).length; i += 8) {
             uint256 index = i / 8;
             result[index] = bytes1(
                 convertBitStringToNumber(substring(bitString, i, i + 8))
             );
-            // result = concat(
-            //     result,
-            //     bytes1(
-            //         convertBitStringToNumber(substring(bitString, i, i + 8))
-            //     ),
-            //     i / 8
-            // );
         }
         return bytes16(result);
     }
@@ -108,109 +86,11 @@ contract ContractTest is DSTest {
         }
     }
 
-    // function stringToUint(string memory s)
-    //     private
-    //     pure
-    //     returns (uint256 result)
-    // {
-    //     bytes memory b = bytes(s);
-    //     uint256 i;
-    //     result = 0;
-    //     for (i = 0; i < b.length; i++) {
-    //         uint256 c = uint256(b[i]);
-    //         if (c >= 48 && c <= 57) {
-    //             result = result * 10 + (c - 48);
-    //         }
-    //     }
-    // }
-
     function setUp() public {
         ethMadness = new EthMadness();
     }
 
-    function testExample() public {
-        ethMadness.deleteLeoEntry();
-        cheats.startPrank(fromAddress);
-        ethMadness.submitEntry(
-            convertEncodedPicksToByteArray(encodedPicks),
-            scoreA,
-            scoreB,
-            bracketName
-        );
-        // entry has been set in entries and given the proper entryIndex
-        (uint48 entryIndex, uint256 entryCompressed) = ethMadness.entries(
-            fromAddress
-        );
-        assertEq(entryIndex, 0);
-        assertGt(entryCompressed, 0);
-        ethMadness.deleteLeoEntry();
-
-        (, uint256 entryCompressed2) = ethMadness.entries(fromAddress);
-        assertEq(entryCompressed2, 0);
-        cheats.startPrank(fromAddress2);
-        ethMadness.submitEntry(
-            convertEncodedPicksToByteArray(encodedPicks),
-            scoreA,
-            scoreB,
-            bracketName
-        );
-        (uint48 entryIndex3, uint256 entryCompressed3) = ethMadness.entries(
-            fromAddress2
-        );
-        assertEq(entryIndex3, 1);
-        assertGt(entryCompressed3, 0);
-    }
-
-    function testGetDependentGames() public {
-        ethMadness.setGameResult(32, 0);
-        ethMadness.setGameResult(0, 0);
-        uint8[6] memory dependentGameIds = [63, 63, 63, 63, 63, 63];
-        dependentGameIds[ethMadness.getRoundForGame(uint8(32))] = 32;
-        uint8 lowestDependentGame = 32;
-        while (lowestDependentGame >= uint8(32)) {
-            lowestDependentGame = ethMadness.getDependentGame(
-                int8(lowestDependentGame)
-            );
-            dependentGameIds[
-                ethMadness.getRoundForGame(uint8(lowestDependentGame))
-            ] = lowestDependentGame;
-        }
-        assertEq(dependentGameIds[0], 0);
-        assertEq(dependentGameIds[1], 32);
-
-        // ethMadness.setGameResult(49, 0);
-        // ethMadness.setGameResult(34, 0);
-        // ethMadness.setGameResult(4, 1);
-        // newDependentGames = ethMadness.getDependentGameRecursive(
-        //     dependentGames,
-        //     49
-        // );
-        // assertEq(newDependentGames[0], 49);
-        // assertEq(newDependentGames[1], 34);
-        // assertEq(newDependentGames[2], 4);
-    }
-
-    function testValidatePick() public {
-        cheats.startPrank(fromAddress);
-        ethMadness.submitEntry(
-            convertEncodedPicksToByteArray(encodedPicks),
-            scoreA,
-            scoreB,
-            bracketName
-        );
-        ethMadness.setGameResult(32, 0);
-        ethMadness.setGameResult(0, 1);
-        cheats.startPrank(fromAddress);
-        bool isPickRight = ethMadness.validateGamePick(32);
-        if (isPickRight == true) {
-            emit log("yes");
-        } else {
-            emit log("no");
-        }
-        // assertTrue(isPickRight, true);
-    }
-
-    // function testMintToken() public {
+    // function testExample() public {
     //     ethMadness.deleteLeoEntry();
     //     cheats.startPrank(fromAddress);
     //     ethMadness.submitEntry(
@@ -219,25 +99,131 @@ contract ContractTest is DSTest {
     //         scoreB,
     //         bracketName
     //     );
+    //     // entry has been set in entries and given the proper entryIndex
+    //     (uint48 entryIndex, uint256 entryCompressed) = ethMadness.entries(
+    //         fromAddress
+    //     );
+    //     assertEq(entryIndex, 0);
+    //     assertGt(entryCompressed, 0);
+    //     ethMadness.deleteLeoEntry();
+
+    //     (, uint256 entryCompressed2) = ethMadness.entries(fromAddress);
+    //     assertEq(entryCompressed2, 0);
+    //     cheats.startPrank(fromAddress2);
+    //     ethMadness.submitEntry(
+    //         convertEncodedPicksToByteArray(encodedPicks),
+    //         scoreA,
+    //         scoreB,
+    //         bracketName
+    //     );
+    //     (uint48 entryIndex3, uint256 entryCompressed3) = ethMadness.entries(
+    //         fromAddress2
+    //     );
+    //     assertEq(entryIndex3, 1);
+    //     assertGt(entryCompressed3, 0);
     // }
 
-    function testShouldBreak() public {
-        ethMadness.deleteLeoEntry();
-        cheats.startPrank(fromAddress);
+    // function testGetDependentGames() public {
+    //     ethMadness.setGameResult(32, 0);
+    //     ethMadness.setGameResult(0, 0);
+    //     uint8[6] memory dependentGameIds = [63, 63, 63, 63, 63, 63];
+    //     dependentGameIds[ethMadness.getRoundForGame(uint8(32))] = 32;
+    //     uint8 lowestDependentGame = 32;
+    //     while (lowestDependentGame >= uint8(32)) {
+    //         lowestDependentGame = ethMadness.getDependentGame(
+    //             int8(lowestDependentGame)
+    //         );
+    //         dependentGameIds[
+    //             ethMadness.getRoundForGame(uint8(lowestDependentGame))
+    //         ] = lowestDependentGame;
+    //     }
+    //     assertEq(dependentGameIds[0], 0);
+    //     assertEq(dependentGameIds[1], 32);
 
-        ethMadness.submitEntry(
-            convertEncodedPicksToByteArray(encodedPicks),
-            scoreA,
-            scoreB,
-            bracketName
-        );
-        cheats.startPrank(fromAddress);
+    //     // ethMadness.setGameResult(49, 0);
+    //     // ethMadness.setGameResult(34, 0);
+    //     // ethMadness.setGameResult(4, 1);
+    //     // newDependentGames = ethMadness.getDependentGameRecursive(
+    //     //     dependentGames,
+    //     //     49
+    //     // );
+    //     // assertEq(newDependentGames[0], 49);
+    //     // assertEq(newDependentGames[1], 34);
+    //     // assertEq(newDependentGames[2], 4);
+    // }
 
-        ethMadness.submitEntry(
-            convertEncodedPicksToByteArray(encodedPicks),
-            scoreA,
-            scoreB,
-            bracketName
-        );
-    }
+    // // function testValidatePick() public {
+    // //     cheats.startPrank(fromAddress);
+    // //     ethMadness.submitEntry(
+    // //         convertEncodedPicksToByteArray(encodedPicks),
+    // //         scoreA,
+    // //         scoreB,
+    // //         bracketName
+    // //     );
+    // //     ethMadness.setGameResult(3, 1);
+    // //     // ethMadness.setGameResult(55, 0);
+    // //     // ethMadness.setGameResult(46, 1);
+    // //     // ethMadness.setGameResult(29, 0);
+    // //     cheats.startPrank(fromAddress);
+    // //     bool isPickRight = ethMadness.validateGamePick(3);
+    // //     if (isPickRight == true) {
+    // //         emit log("yes");
+    // //     } else {
+    // //         emit log("no");
+    // //     }
+    // //     // assertTrue(isPickRight, true);
+    // // }
+
+    // function testValidateAllPicks() public {
+    //     ethMadness.extractResult(
+    //         convertEncodedPicksToByteArray(encodedPicks),
+    //         59
+    //     );
+    //     // bool isValid = ethMadness.arePicksOrResultsValid(
+    //     //     convertEncodedPicksToByteArray(encodedPicks)
+    //     // );
+    //     // if (isValid) {
+    //     //     emit log("valid");
+    //     // } else {
+    //     //     emit log("not valid");
+    //     // }
+    // }
+
+    // // function testMask() public {
+    // //     emit log_named_uint(
+    // //         "mask3",
+    // //         uint128(54697387522694972737846521127068046617) & uint128(48)
+    // //     );
+    // // }
+
+    // // function testMintToken() public {
+    // //     ethMadness.deleteLeoEntry();
+    // //     cheats.startPrank(fromAddress);
+    // //     ethMadness.submitEntry(
+    // //         convertEncodedPicksToByteArray(encodedPicks),
+    // //         scoreA,
+    // //         scoreB,
+    // //         bracketName
+    // //     );
+    // // }
+
+    // function testShouldBreak() public {
+    //     ethMadness.deleteLeoEntry();
+    //     cheats.startPrank(fromAddress);
+
+    //     ethMadness.submitEntry(
+    //         convertEncodedPicksToByteArray(encodedPicks),
+    //         scoreA,
+    //         scoreB,
+    //         bracketName
+    //     );
+    //     cheats.startPrank(fromAddress);
+
+    //     ethMadness.submitEntry(
+    //         convertEncodedPicksToByteArray(encodedPicks),
+    //         scoreA,
+    //         scoreB,
+    //         bracketName
+    //     );
+    // }
 }

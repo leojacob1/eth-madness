@@ -57,17 +57,17 @@ function SimpleAppBar(props) {
     <div className={classes.root}>
       <AppBar position="fixed" className={`${classes.navbar} mui-fixed`}>
         <Toolbar>
-          <NavLink to={{ pathname: `/leaders`, search: props.location.search }} className={classes.header}>
+          {/* <NavLink to={{ pathname: `/leaders`, search: props.location.search }} className={classes.header}>
             <Typography align="right" className={classes.largerFont} variant="overline">Leaderboard</Typography>
-          </NavLink>
-          <NavLink to={{ pathname: `/`, search: props.location.search }}>
+          </NavLink> */}
+          {/* <NavLink to={{ pathname: `/`, search: props.location.search }}>
             <Hidden smUp>
               <img className={classes.logoSmall} src="/logoSmall.png" alt="Eth Madness Logo" />
             </Hidden>
             <Hidden xsDown>
               <img className={classes.logo} src="/logo.png" alt="Eth Madness Logo" />
             </Hidden>
-          </NavLink>
+          </NavLink> */}
           <NavLink to={{ pathname: `/enter`, search: props.location.search }} className={classes.header}>
             <Typography className={classes.largerFont} variant="overline">Create Bracket</Typography>
           </NavLink>
@@ -75,6 +75,10 @@ function SimpleAppBar(props) {
           <Button onClick={() => {
             props.ethersProps.ethMadnessContract.deleteLeoEntry();
           }}>Delete Leo&apos;s bracket</Button>
+          <Button onClick={async () => {
+            const result = await props.ethersProps.ethMadnessContract.validateGamePick(33);
+            console.log(result);
+          }}>Validate</Button>
         </Toolbar>
       </AppBar>
     </div>

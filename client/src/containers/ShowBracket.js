@@ -15,7 +15,6 @@ const mapStateToProps = (state) => {
   const entry = state.leaderboard.allEntries[bracketId];
   if (!entry) {
     // If we don't have this entry in our collection of entries, try reloading the data
-
     return {
       isLoading: true,
       realProps: {}
@@ -50,7 +49,7 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = dispatch => ({
-  loadAction: () => dispatch(Actions.loadEntries())
+  loadAction: (ethersProps) => dispatch(Actions.loadEntries(ethersProps))
 });
 
 export default connect(
