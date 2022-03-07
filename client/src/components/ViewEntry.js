@@ -1,8 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles, Typography, Hidden } from '@material-ui/core';
 import Bracket from './Bracket';
 import BracketMobile from './BracketMobile';
+import { useParams } from 'react-router-dom';
+import { compose } from 'recompose';
+import { withEthers } from '../Ethers';
 
 const styles = theme => ({
   root: {
@@ -47,12 +50,28 @@ const styles = theme => ({
  */
 const ViewEntry = (props) => {
   console.log('view entry!', props.games);
-  const { bracketName, transactionHash, games, classes, makePick, numRounds, submitEnabled,
-    encodedPicks, topTeamScore, bottomTeamScore, message, changeBracketProperty, eliminatedTeamIds, bracketScore, bracketId } = props;
+  const { transactionHash, games, classes, makePick, numRounds, submitEnabled,
+    topTeamScore, bottomTeamScore, message, changeBracketProperty, eliminatedTeamIds, bracketScore, bracketId } = props;
+  const [encodedPicks, setEncodedPicks] = useState();
+  const { submitterAddress } = useParams();
+
+
+  const getBracket = async () => {
+    console.log('leggo')
+    console.log(submitterAddress);
+    const entries = await props.ethersProps.ethMadnessContract.entries(submitterAddress);
+    console.log(entries);
+  }
+
+  useEffect(getBracket, []);
+
+  if (!encodedPicks) {
+    return (<p>Loading</p>);
+  }
   return (
     <div className={classes.root}>
       <div className={classes.titleBar}>
-        <Typography className={classes.title} align="center" variant="h5">{bracketName}</Typography>
+        <Typography className={classes.title} align="center" variant="h5">{ }</Typography>
         <div className={classes.subheader} >
           <Typography className={classes.title} align="center" variant="h6"><span>Score: {bracketScore}</span></Typography>
           <Typography className={classes.title} align="center" variant="h6"><span>
@@ -75,7 +94,7 @@ const ViewEntry = (props) => {
           message={message}
           changeBracketProperty={changeBracketProperty}
           isEditable={false}
-          eliminatedTeamIds={eliminatedTeamIds}
+          eliminatedTeamIds={{}} // eliminatedTeamIds
           bracketId={bracketId}
         />
       </Hidden>
@@ -92,7 +111,7 @@ const ViewEntry = (props) => {
           message={message}
           changeBracketProperty={changeBracketProperty}
           isEditable={false}
-          eliminatedTeamIds={eliminatedTeamIds}
+          eliminatedTeamIds={{}} // eliminatedTeamIds
         />
       </Hidden>
     </div>
@@ -105,7 +124,6 @@ ViewEntry.propTypes = {
   games: PropTypes.array.isRequired,
   topTeamScore: PropTypes.string.isRequired,
   bottomTeamScore: PropTypes.string.isRequired,
-  bracketName: PropTypes.string.isRequired,
   bracketScore: PropTypes.number.isRequired,
   submitter: PropTypes.string.isRequired,
   transactionHash: PropTypes.string.isRequired,
@@ -113,4 +131,4 @@ ViewEntry.propTypes = {
   bracketId: PropTypes.number.isRequired
 };
 
-export default withStyles(styles)(ViewEntry);
+export default compose(withEthers, withStyles(styles))(ViewEntry);

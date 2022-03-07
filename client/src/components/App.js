@@ -1,8 +1,6 @@
 import React from 'react';
-import { ConnectedRouter } from 'connected-react-router';
 import routes from '../routes/index';
 import PropTypes from 'prop-types';
-import NavBar from'./NavBar';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
@@ -44,12 +42,9 @@ const theme = createMuiTheme({
 const App = ({ history }) => {
   return (
     <MuiThemeProvider theme={theme}>
-      <ConnectedRouter history={history}>
-        <div>
-          <NavBar location={history.location}/>
-          { routes }
-        </div>
-      </ConnectedRouter>
+      <div>
+        {routes}
+      </div>
     </MuiThemeProvider>
   );
 };

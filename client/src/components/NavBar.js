@@ -68,7 +68,7 @@ function SimpleAppBar(props) {
               <img className={classes.logo} src="/logo.png" alt="Eth Madness Logo" />
             </Hidden>
           </NavLink> */}
-          <NavLink to={{ pathname: `/enter`, search: props.location.search }} className={classes.header}>
+          <NavLink to={{ pathname: `/enter` }} className={classes.header}>
             <Typography className={classes.largerFont} variant="overline">Create Bracket</Typography>
           </NavLink>
           <ConnectButton />
